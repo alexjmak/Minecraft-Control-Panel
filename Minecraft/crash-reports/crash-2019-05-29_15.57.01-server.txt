@@ -1,0 +1,35 @@
+---- Minecraft Crash Report ----
+// This doesn't make any sense!
+
+Time: 5/29/19, 3:57 PM
+Description: Exception in server tick loop
+
+java.net.UnknownHostException: level-seed=: nodename nor servname provided, or not known
+	at java.base/java.net.Inet4AddressImpl.lookupAllHostAddr(Native Method)
+	at java.base/java.net.InetAddress$PlatformNameService.lookupAllHostAddr(InetAddress.java:929)
+	at java.base/java.net.InetAddress.getAddressesFromNameService(InetAddress.java:1515)
+	at java.base/java.net.InetAddress$NameServiceAddresses.get(InetAddress.java:848)
+	at java.base/java.net.InetAddress.getAllByName0(InetAddress.java:1505)
+	at java.base/java.net.InetAddress.getAllByName(InetAddress.java:1364)
+	at java.base/java.net.InetAddress.getAllByName(InetAddress.java:1298)
+	at java.base/java.net.InetAddress.getByName(InetAddress.java:1248)
+	at so.d(SourceFile:170)
+	at net.minecraft.server.MinecraftServer.run(SourceFile:566)
+	at java.base/java.lang.Thread.run(Thread.java:834)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- System Details --
+Details:
+	Minecraft Version: 1.13.2
+	Operating System: Mac OS X (x86_64) version 10.14.5
+	Java Version: 11.0.1, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode), Oracle Corporation
+	Memory: 1620833776 bytes (1545 MB) / 2147483648 bytes (2048 MB) up to 2147483648 bytes (2048 MB)
+	JVM Flags: 2 total; -Xmx2048M -Xms2048M
+	Profiler Position: N/A (disabled)
+	Data Packs: 
+	Is Modded: Unknown (can't tell)
+	Type: Dedicated Server (map_server.txt)

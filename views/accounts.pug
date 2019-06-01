@@ -1,0 +1,13 @@
+extends layout
+
+block content
+    #main_accounts
+        h1 Account Manager
+        p#computername
+        #accounts
+            p(style='display:inline;') Logged in as:
+            p#username(style='display:inline;') #{username}
+            br
+            br
+        br
+        button#submit.mdc-button.mdc-button--raised Submit

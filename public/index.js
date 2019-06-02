@@ -17,7 +17,7 @@ $(document).ready(function() {
 
     $("#computername").text(parseJwt($.cookie("token")).iss);
 	var getProperties = function() {
-	    getRequest("/Minecraft/server.properties", function(xmlHttpRequest) {
+	    getRequest("/Minecrserver.properties", function(xmlHttpRequest) {
             if (xmlHttpRequest.status == 200) {
                 var propertiesDictionary = {};
                 var propertiesList = xmlHttpRequest.responseText.trim().split("\n");

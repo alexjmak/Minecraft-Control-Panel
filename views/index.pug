@@ -1,5 +1,17 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+    header.mdc-top-app-bar
+        .mdc-top-app-bar__row.mdc-elevation--z4
+            section.mdc-top-app-bar__section.mdc-top-app-bar__section--align-start
+                section.mdc-top-app-bar__section.mdc-top-app-bar__section--align-end
+    .mdc-elevation--z8(style='border-radius: 5px; width:80%; position:fixed; left:0; right:0; bottom:3%; top:10%; margin:auto; padding: 20px 20px 35px 20px; ')
+        h2.demo-card__title.mdc-typography.mdc-typography--headline4(style='margin-top: 5px; margin-bottom: 3px;') #{title}
+        h3#computername.demo-card__subtitle.mdc-typography.mdc-typography--subtitle2(style='margin-top: 0; margin-bottom:5px') #{hostname}
+        #console.mdc-elevation--z4
+            p#console_text(style='margin-top: 0')
+            input#command(type='text', placeholder='Command', style='width: 100%;')
+        br
+        div
+            button#start.mdc-button.mdc-button--raised Start
+            button#stop.mdc-button.mdc-button--raised Stop

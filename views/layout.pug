@@ -2,11 +2,19 @@ doctype html
 html
   head
     title= title
-    link(rel='stylesheet', href='/style.css')
     script.
       var user = "#{username}"
-    script(type='text/javascript', src='/index.js')
+    link(rel='stylesheet', type='text/css', href='/material-components-web.min.css')
+    link(rel='stylesheet', type='text/css', href='/style.css')
     script(type='text/javascript', src='/jquery-3.3.1.js')
+    script(type='text/javascript', src='/jquery.md5.js')
+    script(type='text/javascript', src='/material-components-web.min.js')
+    script(type='text/javascript', src='/jquery.cookie.js')
+    script(type='text/javascript', src='/jwtParser.js')
+    script(type='text/javascript', src='/requests.js')
+    script(type='text/javascript', src='/dialog.js')
+    script(type='text/javascript', src='/snackbar.js')
+    script(type='text/javascript', src= jsFile)
 
   body
     block content

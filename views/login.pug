@@ -1,0 +1,23 @@
+extends layout
+
+block content
+    header.mdc-top-app-bar
+        .mdc-top-app-bar__row.mdc-elevation--z4
+            section.mdc-top-app-bar__section.mdc-top-app-bar__section--align-start
+            section.mdc-top-app-bar__section.mdc-top-app-bar__section--align-end
+    .mdc-card.mdc-elevation--z8(style='width:500px; position:fixed; left:0; right:0; top:25%; margin:auto; padding: 20px; ')
+        .demo-card__primary
+            h2.demo-card__title.mdc-typography.mdc-typography--headline4(style='margin-top: 5px; margin-bottom: 0; ') Login
+            h3#computername.demo-card__subtitle.mdc-typography.mdc-typography--subtitle2(style='margin-top: 7px;')
+        .mdc-text-field
+            input#username.mdc-text-field__input(type='text')
+            .mdc-line-ripple
+            label.mdc-floating-label Username
+        br
+        .mdc-text-field
+            input#password.mdc-text-field__input(type='password')
+            .mdc-line-ripple
+            label.mdc-floating-label Password
+        p#message(style='color: red; margin-top: 5px;')
+        br
+        button#submit.mdc-button.mdc-button--raised Submit

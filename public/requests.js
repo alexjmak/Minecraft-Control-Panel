@@ -11,6 +11,7 @@ var request = function(method, url, data, callback, authorization) {
     if (data == null) {
         xmlHttpRequest.send();
     } else {
+        xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xmlHttpRequest.send(data);
     }
 };

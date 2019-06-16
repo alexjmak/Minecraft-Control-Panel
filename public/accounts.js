@@ -1,8 +1,7 @@
 $(document).ready(function() {
     var main = $("#main_accounts");
     var accounts = $("#accounts");
-    var currentID = parseJwt($.cookie("token")).sub;
-    var currentUsername;
+    var currentID = parseJwt($.cookie("token")).subject;
     var currentPrivilege;
     var initialMD5 = null;
     var scrollHeight = null;
@@ -18,7 +17,7 @@ $(document).ready(function() {
             disableButtonText = "Enable";
         }
 
-        accounts_inputs.append("<div class=\"mdc-text-field\"> <input class=\"account_usernames mdc-text-field__input\" type=\"text\" name=\"" + accountID + "\" value=\"" + accountUsername + "\"> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New username</label> </div> " +
+        accounts_inputs.append("<div class=\"mdc-text-field\"> <input class=\"account_usernames mdc-text-field__input\" type=\"text\" name=\"" + accountID + "\" value=\"" + accountUsername + "\" autocomplete='off'> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New username</label> </div> " +
             "<div class=\"mdc-text-field\"> <input class=\"account_passwords mdc-text-field__input\" type=\"password\" name=\"" + accountID + "\"> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New password</label> </div> " +
             "<button class=\"account_disable mdc-button\" name=\"" + accountID + "\">" + disableButtonText + "</button> " +
             "<button class=\"account_delete mdc-button\" name=\"" + accountID + "\">Delete</button>" +
@@ -38,51 +37,45 @@ $(document).ready(function() {
                     window.location = "/logout";
                 }
 
-                var accountsList = xmlHttpRequest.responseText.trim().split("\n");
+                var accountsList = JSON.parse(xmlHttpRequest.responseText.trim());
 
-                for (var line in accountsList) {
-                    var account = accountsList[line].split(",");
+                var currentAccount = accountsList.filter(account => account.id === currentID)[0];
+                currentPrivilege = currentAccount["privilege"];
+                currentUsername = currentAccount["username"];
+                $("#currentUsername").text(currentUsername);
 
-                    if (account[0] == currentID) {
-                        currentUsername = account[1];
-                        currentPrivilege = account[3];
-                        $("#username").text(currentUsername);
+                showNewAccount(currentID, currentUsername, true);
+                $(".account_disable[name=" + currentID + "]").hide();
 
-                        showNewAccount(currentID, currentUsername, true);
-                        $(".account_disable[name=" + currentID + "]").hide();
-                        break;
-                    }
-                }
 
-                for (var line in accountsList) {
-                    var account = accountsList[line].split(",");
+                for (var account in accountsList) {
+                    account = accountsList[account];
 
-                    if (account[0] != currentID) {
-                        var accountID = account[0];
-                        var accountUsername = account[1];
-                        var accountEnabled = account[2] == "1";
-                        var accountPrivilege = account[3];
+                    var accountID = account["id"];
+                    var accountUsername = account["username"];
+                    if (accountID !== currentID) {
+                        var accountEnabled = account["enabled"] === 1;
+                        var accountPrivilege = account["privilege"];
 
-                        if ((accountPrivilege < currentPrivilege && accountUsername != "admin") || currentUsername == "admin") {
+                        if ((currentPrivilege > 0 && currentPrivilege > accountPrivilege  && accountUsername !== "admin") || currentUsername === "admin") {
                             showNewAccount(accountID, accountUsername, accountEnabled);
                         }
                     }
 
-                    if (account[1] == "admin") {
-                        $(".account_usernames[name=" + account[0] + "]").prop("disabled", true);
-                        $(".account_disable[name=" + account[0] + "]").prop("disabled", true);
-                        $(".account_delete[name=" + account[0] + "]").prop("disabled", true);
+                    if (account["username"] === "admin") {
+                        $(".account_usernames[name=" + accountID + "]").prop("disabled", true);
+                        $(".account_disable[name=" + accountID + "]").prop("disabled", true);
+                        $(".account_delete[name=" + accountID + "]").prop("disabled", true);
                     }
 
-                    usernameStorage[account[0]] = account[1];
+                    usernameStorage[accountID] = accountUsername;
                 }
 
-                if (currentPrivilege > 0 || currentUsername == "admin") {
-                    accounts_inputs.append("<div class=\"mdc-text-field\"> <input class=\"mdc-text-field__input\" id=\"new_account_username\" type=\"text\"> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New account username</label> </div> " +
+                if (currentPrivilege > 0 || currentUsername === "admin") {
+                    accounts_inputs.append("<div class=\"mdc-text-field\"> <input class=\"mdc-text-field__input\" id=\"new_account_username\" type=\"text\" autocomplete='off'> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New account username</label> </div> " +
                         "<div class=\"mdc-text-field\"> <input class=\"mdc-text-field__input\" id=\"new_account_password\" type=\"password\"> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New account password</label> </div> " +
                         "<button class=\"mdc-button\" id=\"new_account_submit\">Create</button>" +
                         "<br><br>")
-
                 }
 
                 var x = document.getElementsByClassName('mdc-text-field');
@@ -114,12 +107,13 @@ $(document).ready(function() {
         postRequest("/accounts/" + url, data, function(xmlHttpRequest) {
             getInitialHash();
             showSnackbar(basicSnackbar, xmlHttpRequest.responseText);
-            if (xmlHttpRequest.status == 200) {
-                if (url == "enable") selector.html("Disable");
-                if (url == "disable") selector.html("Enable");
-                $("#username").text(currentUsername);
+            if (xmlHttpRequest.status === 200) {
+                if (url === "enable") selector.html("Disable");
+                if (url === "disable") selector.html("Enable");
+                $("#currentUsername").text(currentUsername);
+                $("#accountCard").first().find("h2").text(currentUsername);
             }
-            if (xmlHttpRequest.status != 200 || (xmlHttpRequest.status == 200 && (url == "delete" || url == "new"))) {
+            if (xmlHttpRequest.status !== 200 || (xmlHttpRequest.status === 200 && (url === "delete" || url === "new"))) {
                 scrollHeight = accounts[0].scrollHeight - accounts.scrollTop();
                 getAccounts();
             }
@@ -127,8 +121,8 @@ $(document).ready(function() {
     };
 
     var getInitialHash = function() {
-        getRequest("/accounts/hash", function(xmlHttpRequest) {
-            if (xmlHttpRequest.status == 200) {
+        getRequest("/accounts/list/hash", function(xmlHttpRequest) {
+            if (xmlHttpRequest.status === 200) {
                 initialMD5 = xmlHttpRequest.responseText;
             }
         });
@@ -159,7 +153,9 @@ $(document).ready(function() {
 
             if (usernameStorage[id] != newUsername && newUsername != "") {
                 usernameStorage[id] = newUsername;
-                if (id == currentID) currentUsername = newUsername;
+                if (id == currentID) {
+                    currentUsername = newUsername;
+                }
                 postDictionary[id]["new_username"] = newUsername;
 			}
 			if (newUsername == "") {
@@ -199,7 +195,7 @@ $(document).ready(function() {
     };
 
     var submitCheck = function() {
-        getRequest("/accounts/hash", function (xmlHttpRequest) {
+        getRequest("/accounts/list/hash", function (xmlHttpRequest) {
             if (xmlHttpRequest.status == 200) {
                 if (xmlHttpRequest.responseURL.search("login") != -1) {
                     window.location = "/logout";
@@ -243,7 +239,7 @@ $(document).ready(function() {
         var id = $(this)[0].name;
         var data = "id=" + encodeURIComponent(id);
 
-        if ($(this).html() == "Disable") {
+        if ($(this).html() === "Disable") {
             updateAccount(data, "disable", $(this));
         } else {
             updateAccount(data, "enable", $(this));
@@ -259,7 +255,12 @@ $(document).ready(function() {
             prompt = "Are you sure you want to delete your account?";
         }
 
-        showDialog(yesNoDialog, "Game Server Control Panel", prompt, {"yes": function() {updateAccount(data, "delete");}});
+        showDialog(yesNoDialog, "Game Server Control Panel", prompt, {"yes": function() {
+            updateAccount(data, "delete");
+            if (currentID == id) {
+                window.location = "/logout";
+            }
+        }});
     };
 
     $("#submit").click(submitCheck);

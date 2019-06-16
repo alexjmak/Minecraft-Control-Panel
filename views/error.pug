@@ -1,29 +1,10 @@
 extends layout
 
 block content
-    style.
-        @import url("/public/roboto.css");
-        body {
-            font-family: Roboto, Arial, Helvetica, sans-serif;
-            background-color: #f7f7f7;
-        }
-        div {
-            height: 175px;
-            width: 500px;
-            background-color: white;
-            border: 0.5px solid gray;
-            border-radius: 10px;
-            box-shadow: 2px 2px 5px grey;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-        }
-        p {
-            text-align: center;
-            font-size: 20px;
-        }
     div
-        h1= title
-        p Error #{status} - #{message}
-        br
+        .mdc-elevation--z8(style='border-radius: 5px; width:450px; position:fixed; left:0; right:0; bottom:60%; top:15%; margin:auto; padding: 20px 20px 55px 20px; ')
+            h2.mdc-typography.mdc-typography--headline4(style='font-weight: bold; text-align: center; margin-top: 5px; margin-bottom: 3px;') Game Server Control Panel
+            h3#computername.mdc-typography.mdc-typography--subtitle2(style='margin-top: 0; margin-bottom:5px')= hostname
+            p(style="text-align: center; font-size: 20px;") Error #{status} - #{message}
+            br
+            br

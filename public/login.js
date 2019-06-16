@@ -34,7 +34,7 @@ $(document).ready(function() {
     };
 
     var submit = function() {
-      getRequest("/login/token", login, "Basic " + btoa(username.val() + ":" + password.val()));
+      getRequest("/login/token", login, "Basic " + btoa(username.val().trim() + ":" + password.val()));
     };
 
     $(document).keypress(function(e) {

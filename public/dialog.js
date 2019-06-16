@@ -68,6 +68,7 @@ var showDialog = function(type, title, body, actionFunctions) {
 
     dialog.listen('MDCDialog:closed', function() {
         $("#dialog").remove();
+
         if (actionFunctions != undefined) {
             try {
                 actionFunctions[event.detail.action]();

@@ -1,13 +1,14 @@
+block variables
 doctype html
 html
   head
-    title= title
-    script.
-      var user = "#{username}"
+    title= "Game Server Control Panel"
     link(rel='stylesheet', type='text/css', href='/material-components-web.min.css')
+    link(rel='stylesheet', type='text/css', href='/Material-Icons/material-icons.css')
     link(rel='stylesheet', type='text/css', href='/style.css')
     script(type='text/javascript', src='/jquery-3.3.1.js')
     script(type='text/javascript', src='/jquery.md5.js')
+    script(type='text/javascript', src='/jquery.cookie.js')
     script(type='text/javascript', src='/material-components-web.min.js')
     script(type='text/javascript', src='/jquery.cookie.js')
     script(type='text/javascript', src='/jwtParser.js')
@@ -15,6 +16,108 @@ html
     script(type='text/javascript', src='/dialog.js')
     script(type='text/javascript', src='/snackbar.js')
     script(type='text/javascript', src= jsFile)
+    block header
+    script.
+      let currentUsername = "#{username}"
+
+      $(document).ready(function() {
+        if (window.location.pathname === "/login") {
+          $('#userButton').attr("disabled", true);
+        }
+        const topAppBar = mdc.topAppBar.MDCTopAppBar.attachTo(document.querySelector('.mdc-top-app-bar'));
+        const drawer = mdc.drawer.MDCDrawer.attachTo(document.querySelector('.mdc-drawer'));
+
+        let listItems = $(".mdc-list-item");
+        listItems.each(function() {
+          let listItem = $(this);
+          if (listItem.attr("href") === window.location.pathname) {
+            listItems.removeClass("mdc-list-item--activated");
+            listItem.attr("class", "mdc-list-item mdc-list-item--activated");
+            return false;
+          }
+        });
+
+        topAppBar.listen('MDCTopAppBar:nav', function () {
+          drawer.open = true;
+        });
+
+        let accountCard = $("#accountCard");
+        if ($.cookie("token") !== undefined) {
+          accountCard.first().find("h3").text("ID: " + parseJwt($.cookie("token")).subject);
+        }
+
+        $(document).mouseup(function (e) {
+          if (accountCard.is(":visible")) {
+            if (!accountCard.is(e.target) && accountCard.has(e.target).length === 0) {
+              setTimeout(function() {
+                accountCard.hide();
+              }, 0)
+
+            }
+          }
+        })
+
+        $("#currentUsername").click(function() {
+          if (!accountCard.is(":visible")) {
+            accountCard.show();
+          }
+        });
+
+        $("#accountButton").click(function() {
+          if (!accountCard.is(":visible")) {
+            accountCard.show();
+          }
+        });
+
+      });
 
   body
-    block content
+    aside.mdc-drawer.mdc-drawer--modal
+      .mdc-drawer__header
+        h3.mdc-drawer__title GS Control Panel
+        h6.mdc-drawer__subtitle= hostname
+      .mdc-drawer__content
+        nav.mdc-list
+
+          a.mdc-list-item.mdc-list-item--activated(href='/')
+            i.material-icons.mdc-list-item__graphic(aria-hidden='true') code
+            span.mdc-list-item__text Console
+          a.mdc-list-item(href='/properties')
+            i.material-icons.mdc-list-item__graphic(aria-hidden='true') list
+            span.mdc-list-item__text Server Properties
+          a.mdc-list-item(href='/accounts')
+            i.material-icons.mdc-list-item__graphic(aria-hidden='true') account_circle
+            span.mdc-list-item__text Account Manager
+          .mdc-list-divider
+          a.mdc-list-item(href='/logout')
+            i.material-icons.mdc-list-item__graphic(aria-hidden='true') launch
+            span.mdc-list-item__text Logout
+    .mdc-drawer-scrim
+    .mdc-drawer-app-content
+      header.mdc-top-app-bar
+        .mdc-top-app-bar__row.mdc-elevation--z4
+
+          section.mdc-top-app-bar__section.mdc-top-app-bar__section--align-start
+            button.material-icons.mdc-top-app-bar__navigation-icon.mdc-ripple(id="drawerButton" style="color: white; background-color: transparent; border: none; outline: none") menu
+          section.mdc-top-app-bar__section.mdc-top-app-bar__section--align-end
+            h3(id="currentUsername", style="font-weight: normal; cursor: pointer;")= username
+            button.material-icons(id='accountButton' type='submit' style="font-size: 36px; color: white; background-color: transparent; border: none; outline: none") perm_identity
+      block content
+    br
+    br
+    br
+    br
+    #accountCard.mdc-card.mdc-elevation--z10(style=" display:none; z-index:1;position:relative;width: 300px; float:right; margin-right: 25px; padding-bottom: 10px; padding-left: 16px;")
+      .demo-card__primary
+        div(style="padding-right: 16px;")
+          i.material-icons.mdc-list-item__graphic(style='display:inline; float: left; font-size: 64px') account_circle
+          h2.mdc-typography.mdc-typography--headline6(style="text-align: right; margin-bottom: 0")= username
+          h3.mdc-typography.mdc-typography--subtitle2(style="text-align: right; margin-top: 0")
+
+        .mdc-card__action-buttons(style="float: right; padding-right: 7px;")
+          a(href="/account")
+            button.mdc-button.mdc-card__action.mdc-card__action--button(style="float: right") Account
+          a(href="/logout")
+            button.mdc-button.mdc-card__action.mdc-card__action--button(style="float: right") Logout
+
+

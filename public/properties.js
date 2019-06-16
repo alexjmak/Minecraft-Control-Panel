@@ -6,8 +6,8 @@ $(document).ready(function() {
     var initialMD5 = null;
 
     var getProperties = function() {
-        getRequest("/Minecraft/server.properties", function(xmlHttpRequest) {
-            if (xmlHttpRequest.status == 200) {
+        getRequest("/files/server.properties", function(xmlHttpRequest) {
+            if (xmlHttpRequest.status === 200) {
                 var propertiesList = xmlHttpRequest.responseText.trim().split("\n");
                 for (var line in propertiesList) {
                     var property = propertiesList[line];
@@ -21,12 +21,20 @@ $(document).ready(function() {
                 for(var property in initialPropertiesDictionary) {
                     if (initialPropertiesDictionary.hasOwnProperty(property)) {
                         var value = initialPropertiesDictionary[property];
-                        properties.append("<p class=\"property\">" + property + " <input class=\"property_input\" type=\"text\" value=\"" + value + "\"></p><br>");
+                        properties.append("<div class=\"mdc-text-field\" style='margin-right: 5px; margin-bottom: 5px;'> <input class=\"property mdc-text-field__input\" type=\"text\" name=\"" + property + "\" value=\"" + value + "\" autocomplete='off'> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">" + property + "</label></div>")
                     }
                 }
 
-                var propertyhtml = properties.html();
-                properties.html(propertyhtml.substring(propertyhtml.length - 4, propertyhtml - 1));
+                var x = document.getElementsByClassName('mdc-text-field');
+                for (var i = 0; i < x.length; i++) {
+                    new mdc.textField.MDCTextField(x[i]);
+                }
+
+                x = document.getElementsByClassName('mdc-button');
+                for (var i = 0; i < x.length; i++) {
+                    mdc.ripple.MDCRipple.attachTo(x[i]);
+                }
+
             }
         });
     };
@@ -43,20 +51,17 @@ $(document).ready(function() {
     getInitialHash();
 
     var submit = function() {
-        for (var propertyIndex in $(".property")) {
-            var property = $(".property")[propertyIndex];
-
-            var property_input = property.lastChild;
+        $(".property").each(function() {
+            var property_input = $(this);
 
             try {
-                var property_text = property.firstChild.textContent;
+                var property_text = property_input.attr("name");
+
             } catch (TypeError) {
-                continue;
+                return;
             }
-            property_text = property_text.substring(0, property_text.length - 1);
-
             try {
-                var property_input_text = property_input.value.trim();
+                var property_input_text = property_input.val().trim();
             } catch (TypeError) {
                 property_input_text = "";
             }
@@ -71,10 +76,10 @@ $(document).ready(function() {
                 propertiesDictionary[property_text] = property_input_text;
                 initialPropertiesDictionary[property_text] = property_input_text;
             }
-        }
+        });
 
         if (Object.keys(propertiesDictionary).length == 0) {
-            alert("No changes were made");
+            showSnackbar(basicSnackbar, "No changes were made");
         } else {
             var post = "";
             for (var property in propertiesDictionary) {
@@ -84,10 +89,13 @@ $(document).ready(function() {
                 }
             }
             post = post.substring(0, post.length - 1);
-
-            postRequest("/properties", post, function(xmlHttpRequest) {
-                alert(xmlHttpRequest.responseText);
+            postRequest("/properties/update", post, function(xmlHttpRequest) {
+                showSnackbar(basicSnackbar, xmlHttpRequest.responseText);
                 getInitialHash();
+                if (xmlHttpRequest.status !== 200) {
+                    properties.empty();
+                    getProperties();
+                }
             });
         }
     };

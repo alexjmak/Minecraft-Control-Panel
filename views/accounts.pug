@@ -1,13 +1,10 @@
 extends layout
 
 block content
-    #main_accounts
-        h1 Account Manager
-        p#computername
-        #accounts
-            p(style='display:inline;') Logged in as:
-            p#username(style='display:inline;') #{username}
-            br
-            br
+    .box.mdc-elevation--z8(style='border-radius: 5px; width:50%; position:fixed; left:0; right:0; bottom:10%; top:15%; margin:auto; padding: 20px 20px 55px 20px; ')
+        h2.mdc-typography.mdc-typography--headline4(style='margin-top: 5px; margin-bottom: 3px;') Account Manager
+        h3#computername.mdc-typography.mdc-typography--subtitle2(style='margin-top: 0; margin-bottom:5px')= hostname
+        #accounts.box
         br
-        button#submit.mdc-button.mdc-button--raised Submit
+        div
+            button#submit.mdc-button.mdc-button--raised Save

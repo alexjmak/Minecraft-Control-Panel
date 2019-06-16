@@ -1,4 +1,3 @@
-console.log(user);
 $(document).ready(function() {
     var x = document.getElementsByClassName('mdc-button');
     var i;
@@ -15,10 +14,50 @@ $(document).ready(function() {
     var scrollDifference = consoleDiv[0].scrollHeight - consoleDiv.scrollTop();
     var noConnDialog;
 
-    $("#computername").text(parseJwt($.cookie("token")).iss);
+
+    const memoryBar = mdc.linearProgress.MDCLinearProgress.attachTo(document.getElementById('memoryBar'));
+
+    var updateGameServerStatus = function() {
+        if (online) {
+            $("#online").text("ONLINE");
+            $("#online").css("color", "green");
+            $("#playerCount").text("v" + version + " (" + current_players + "/" + max_players + ")");
+            $("#memory").text((memory/1000000000).toFixed(2) + "/" + (allocatedMemory/1000000000).toFixed(2) + " GB" + " (" + (memory/allocatedMemory * 100).toFixed(2) + "%)")
+            memoryBar.progress = memory/allocatedMemory;
+            $("#processUsage").attr("hidden", false);
+        } else {
+            $("#online").text("OFFLINE");
+            $("#online").css("color", "red");
+            $("#playerCount").text("");
+            $("#processUsage").attr("hidden", true);
+        }
+    };
+
+
+    var getGameServerStatus = function(automatic) {
+        getRequest("/status", function(xmlHttpRequest) {
+            let timeout = 10000;
+            if (xmlHttpRequest.status === 200) {
+                var status = JSON.parse(xmlHttpRequest.responseText);
+                if (status.online === null) timeout = 5000;
+                online = status.online === true;
+                version = status.version;
+                current_players = status.current_players;
+                max_players = status.max_players;
+                memory = status.memory;
+                allocatedMemory = status.allocatedMemory;
+                updateGameServerStatus();
+            }
+            if (automatic) {
+                window.setTimeout(getGameServerStatus, timeout, true);
+            }
+        });
+
+    };
+
 	var getProperties = function() {
-	    getRequest("/Minecrserver.properties", function(xmlHttpRequest) {
-            if (xmlHttpRequest.status == 200) {
+	    getRequest("/files/server.properties", function(xmlHttpRequest) {
+            if (xmlHttpRequest.status === 200) {
                 var propertiesDictionary = {};
                 var propertiesList = xmlHttpRequest.responseText.trim().split("\n");
                 for (var line in propertiesList) {
@@ -35,22 +74,32 @@ $(document).ready(function() {
     };
 	
     var getLogHash = function(automatic) {
+
         getRequest("/log/hash", function(xmlHttpRequest) {
             if (xmlHttpRequest.status == 200) {
                 if (noConnDialog != undefined && noConnDialog.isOpen) noConnDialog.close();
                 var md5 = xmlHttpRequest.responseText;
                 if (xmlHttpRequest.responseURL.search("login") != -1) {
+                    automatic = false;
                     showDialog(okDialog, "Game Server Control Panel", "Your session has expired", {"close": function() {window.location = "/logout"}});
                 } else if (oldMD5 != md5) {
                     oldMD5 = md5;
                     getLog();
                 }
             }
-            if (xmlHttpRequest.status == 0) {
-                noConnDialog = showDialog(okDialog, "Game Server Control Panel", "No connection");
-                noConnDialog.buttons_[0].firstChild.innerHTML = "RETRY";
-                noConnDialog.escapeKeyAction = "";
-                noConnDialog.scrimClickAction = "";
+            if (xmlHttpRequest.status == 0 && (noConnDialog === undefined || !noConnDialog.isOpen)) {
+                try {
+                    noConnDialog = showDialog(okDialog, "Game Server Control Panel", "No connection", {
+                        "close": function() {
+                            getLogHash(false);
+                        }
+                    });
+                    noConnDialog.buttons_[0].firstChild.innerHTML = "RETRY";
+                    noConnDialog.escapeKeyAction = "";
+                    noConnDialog.scrimClickAction = "";
+                } catch (err) {
+                }
+
             }
             if (automatic) {
                 window.setTimeout(getLogHash, 5000, true);
@@ -60,14 +109,14 @@ $(document).ready(function() {
 
     var getLog = function() {
         getRequest("/log", function(xmlHttpRequest) {
+
             if (xmlHttpRequest.status == 200) {
                 var logText = xmlHttpRequest.responseText;
                 logText = logText.replace(/\n/g, "<br>");
                 log.text("");
                 log.append(logText);
-                if (oldLogText != logText) {
+                if (oldLogText !== logText) {
                     oldLogText = logText;
-                    var logLines = logText.split(/\r*<br>/).length;
                     if ((consoleDiv[0].scrollHeight - consoleDiv.scrollTop()) < scrollDifference + 130) {
                         consoleDiv.scrollTop(consoleDiv[0].scrollHeight);
                     } else {
@@ -116,6 +165,8 @@ $(document).ready(function() {
         postCommand("stop")
     });
 
+    updateGameServerStatus();
     getProperties();
     getLogHash(true);
+    getGameServerStatus(true);
 });

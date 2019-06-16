@@ -1,8 +1,10 @@
 const express = require('express');
+
 const router = express.Router();
 
-router.get('/', function(req, res) {
-  res.render('index', {jsFile: 'files.js'});
+router.get('/', function(req, res, next) {
+  res.clearCookie("token");
+  res.redirect("/login");
 });
 
 module.exports = router;

@@ -1,4 +1,4 @@
-@import url("/public/roboto.css");
+@import url("Roboto/roboto.css");
 
 
 :root {
@@ -12,6 +12,9 @@ body {
 
 }
 
+.box {
+    background-color: #ffffff;
+}
 h1 {
     font-size: 30px;
     margin-top: 0;
@@ -21,7 +24,6 @@ h1 {
 #console {
     height: 80%;
     width: 99%;
-    border: 0.5px solid gray;
     border-radius: 5px;
     overflow: scroll;
     padding: 5px;
@@ -31,21 +33,17 @@ h1 {
 #properties {
     height: 80%;
     width: 99%;
-    border: 0.5px solid gray;
     border-radius: 5px;
     overflow: scroll;
     padding: 5px;
-    background-color: white;
 }
 
 #accounts {
-    height: 70%;
+    height: 80%;
     width: 99%;
-    border: 0.5px solid gray;
     border-radius: 5px;
     overflow: scroll;
     padding: 5px;
-    background-color: white;
 
 }
 
@@ -137,6 +135,10 @@ h1 {
 input[type="button"] {
     width: 75px;
     margin-top: 7px;
+    cursor: pointer;
+}
+
+button {
     cursor: pointer;
 }
 

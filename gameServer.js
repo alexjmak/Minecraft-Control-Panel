@@ -41,8 +41,11 @@ function getUsage(next) {
         return;
     }
     pidusage(gameServer.pid, function(err, usage) {
-        usage.allocatedMemory = allocatedMemory * 1000000;
-        if (next !== undefined) next(usage);
+        if (err === null) {
+            usage.allocatedMemory = allocatedMemory * 1000000;
+            if (next !== undefined) next(usage);
+        } else next();
+
     });
 }
 

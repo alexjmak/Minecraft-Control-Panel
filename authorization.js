@@ -1,7 +1,6 @@
 const os = require("os");
 const fs = require('fs');
 const jwt = require("jsonwebtoken");
-const createError = require('http-errors');
 const accountManager = require("./accountManager");
 
 const secretKey = fs.readFileSync('./keys/jwt/secret.key', 'utf8');
@@ -74,7 +73,7 @@ async function login(req, res) {
                         res.status(200).send();
                         return;
                     } else {
-                        response = "Account has been disabled";
+                        response = "Your account is disabled";
                     }
                 }
             }

@@ -9,6 +9,7 @@ $(document).ready(function() {
 
     var usernameStorage;
 
+
     var showNewAccount = function(accountID, accountUsername, enabled) {
         var disableButtonText;
         if (enabled) {
@@ -17,11 +18,20 @@ $(document).ready(function() {
             disableButtonText = "Enable";
         }
 
-        accounts_inputs.append("<div class=\"mdc-text-field\"> <input class=\"account_usernames mdc-text-field__input\" type=\"text\" name=\"" + accountID + "\" value=\"" + accountUsername + "\" autocomplete='off'> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New username</label> </div> " +
-            "<div class=\"mdc-text-field\"> <input class=\"account_passwords mdc-text-field__input\" type=\"password\" name=\"" + accountID + "\"> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New password</label> </div> " +
-            "<button class=\"account_disable mdc-button\" name=\"" + accountID + "\">" + disableButtonText + "</button> " +
-            "<button class=\"account_delete mdc-button\" name=\"" + accountID + "\">Delete</button>" +
-            "<br><br>")
+        if (!isMobile && $(window).width() > 455) {
+            accounts_inputs.append("<div class=\"mdc-text-field\"> <input class=\"account_usernames mdc-text-field__input\" type=\"text\" autocomplete='off' autocapitalize=\"none\" name=\"" + accountID + "\" value=\"" + accountUsername + "\" autocomplete='off'> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New username</label> </div> " +
+                "<div class=\"mdc-text-field\"> <input class=\"account_passwords mdc-text-field__input\" type=\"password\" name=\"" + accountID + "\"> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New password</label> </div> " +
+                "<button class=\"account_disable mdc-button\" name=\"" + accountID + "\">" + disableButtonText + "</button> " +
+                "<button class=\"account_delete mdc-button\" name=\"" + accountID + "\">Delete</button>" +
+                "<br><br>")
+        } else {
+            accounts_inputs.append("<div class=\"mdc-text-field\"> <input class=\"account_usernames mdc-text-field__input\" type=\"text\" autocomplete='off' autocapitalize=\"none\" name=\"" + accountID + "\" value=\"" + accountUsername + "\" autocomplete='off'> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New username</label> </div> " +
+                "<button class=\"account_disable mdc-button\" name=\"" + accountID + "\">" + disableButtonText + "</button> " +
+                "<div class=\"mdc-text-field\"> <input class=\"account_passwords mdc-text-field__input\" type=\"password\" name=\"" + accountID + "\"> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New password</label> </div> " +
+                "<button class=\"account_delete mdc-button\" name=\"" + accountID + "\">Delete</button>" +
+                "<br><br>")
+        }
+
     };
 
     var getAccounts = function() {
@@ -72,7 +82,7 @@ $(document).ready(function() {
                 }
 
                 if (currentPrivilege > 0 || currentUsername === "admin") {
-                    accounts_inputs.append("<div class=\"mdc-text-field\"> <input class=\"mdc-text-field__input\" id=\"new_account_username\" type=\"text\" autocomplete='off'> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New account username</label> </div> " +
+                    accounts_inputs.append("<div class=\"mdc-text-field\"> <input class=\"mdc-text-field__input\" id=\"new_account_username\" type=\"text\" autocomplete='off' autocapitalize=\"none\"> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New account username</label> </div> " +
                         "<div class=\"mdc-text-field\"> <input class=\"mdc-text-field__input\" id=\"new_account_password\" type=\"password\"> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">New account password</label> </div> " +
                         "<button class=\"mdc-button\" id=\"new_account_submit\">Create</button>" +
                         "<br><br>")
@@ -204,7 +214,7 @@ $(document).ready(function() {
                 if (initialMD5 == md5) {
                     submit();
                 } else {
-                    showDialog(yesNoDialog, "Game Server Control Panel", "Changes have been made since you entered this site.\nDo you want to override those changes?", {"yes": function() {submit();}});
+                    showDialog(yesNoDialog, "Minecraft Control Panel", "Changes have been made since you entered this site.\nDo you want to override those changes?", {"yes": function() {submit();}});
                 }
             }
         });
@@ -255,13 +265,14 @@ $(document).ready(function() {
             prompt = "Are you sure you want to delete your account?";
         }
 
-        showDialog(yesNoDialog, "Game Server Control Panel", prompt, {"yes": function() {
+        showDialog(yesNoDialog, "Minecraft Control Panel", prompt, {"yes": function() {
             updateAccount(data, "delete");
             if (currentID == id) {
                 window.location = "/logout";
             }
         }});
     };
+
 
     $("#submit").click(submitCheck);
 

@@ -3,8 +3,8 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/', function(req, res, next) {
-  res.clearCookie("token");
-  res.redirect("/login");
+    res.clearCookie("token");
+    res.redirect("/login");
 });
 
 module.exports = router;

@@ -21,7 +21,7 @@ $(document).ready(function() {
                 for(var property in initialPropertiesDictionary) {
                     if (initialPropertiesDictionary.hasOwnProperty(property)) {
                         var value = initialPropertiesDictionary[property];
-                        properties.append("<div class=\"mdc-text-field\" style='margin-right: 5px; margin-bottom: 5px;'> <input class=\"property mdc-text-field__input\" type=\"text\" name=\"" + property + "\" value=\"" + value + "\" autocomplete='off'> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">" + property + "</label></div>")
+                        properties.append("<div class=\"mdc-text-field\" style='margin-right: 5px; margin-bottom: 5px;'> <input class=\"property mdc-text-field__input\" type=\"text\" autocomplete='off' autocapitalize=\"none\" name=\"" + property + "\" value=\"" + value + "\" autocomplete='off'> <div class=\"mdc-line-ripple\"></div> <label class=\"mdc-floating-label\">" + property + "</label></div>")
                     }
                 }
 

@@ -1,10 +1,13 @@
 extends layout
 
+block header
+    link(rel='stylesheet', type='text/css', href='/stylesheets/error.css')
+    link(class='mobileCSS' rel='stylesheet', type='text/css', href='/stylesheets/error-mobile.css' disabled)
+
 block content
-    div
-        .mdc-elevation--z8(style='border-radius: 5px; width:450px; position:fixed; left:0; right:0; bottom:60%; top:15%; margin:auto; padding: 20px 20px 55px 20px; ')
-            h2.mdc-typography.mdc-typography--headline4(style='font-weight: bold; text-align: center; margin-top: 5px; margin-bottom: 3px;') Game Server Control Panel
-            h3#computername.mdc-typography.mdc-typography--subtitle2(style='margin-top: 0; margin-bottom:5px')= hostname
-            p(style="text-align: center; font-size: 20px;") Error #{status} - #{message}
-            br
-            br
+    .box.mdc-elevation--z8
+        h2#title.mdc-typography.mdc-typography--headline4 Minecraft Control Panel
+        h3#computername.mdc-typography.mdc-typography--subtitle2= hostname
+        p#message Error #{status} - #{message}
+        br
+        br

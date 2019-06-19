@@ -1,19 +1,24 @@
 extends layout
 
+block header
+    link(rel='stylesheet', type='text/css', href='/stylesheets/login.css')
+    link(class='mobileCSS' rel='stylesheet', type='text/css', href='/stylesheets/login-mobile.css' disabled)
+    script(type= "text/javascript", src= "/javascripts/login.js")
+
 block content
-    .mdc-card.mdc-elevation--z8(style='width:500px; position:fixed; left:0; right:0; top:25%; margin:auto; padding: 20px; ')
+    .box.mdc-card.mdc-elevation--z8
         .demo-card__primary
-            h2.demo-card__title.mdc-typography.mdc-typography--headline4(style='margin-top: 5px; margin-bottom: 0; ') Login
-            h3#computername.demo-card__subtitle.mdc-typography.mdc-typography--subtitle2(style='margin-top: 7px;')= hostname
+            h2#title.demo-card__title.mdc-typography.mdc-typography--headline4 Login
+            h3#computername.demo-card__subtitle.mdc-typography.mdc-typography--subtitle2= hostname
         .mdc-text-field
-            input#username.mdc-text-field__input(type='text')
+            input#username.mdc-text-field__input(type='text' tabindex=1 autocomplete='off' autocapitalize="none")
             .mdc-line-ripple
             label.mdc-floating-label Username
         br
         .mdc-text-field
-            input#password.mdc-text-field__input(type='password')
+            input#password.mdc-text-field__input(type='password' tabindex=2)
             .mdc-line-ripple
             label.mdc-floating-label Password
-        p#message(style='color: red; margin-top: 5px;')
+        p#message
         br
         button#submit.mdc-button.mdc-button--raised Submit

@@ -40,7 +40,12 @@ $(document).ready(function() {
     $(document).keypress(function(e) {
         var key = e.which;
         if (key == 13) {
-            submit();
+            if ($("#username").is(":focus")) {
+                $("#password").focus();
+            } else {
+                submit();
+            }
+
         }
     });
 

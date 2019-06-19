@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const strftime = require('strftime');
 const cookieParser = require('cookie-parser');
-
+const MobileDetect = require('mobile-detect');
 const helmet = require("helmet");
 
 const authorization = require('./authorization');
@@ -19,7 +19,7 @@ const loginRouter = require('./routes/login');
 const logoutRouter = require('./routes/logout');
 const propertiesRouter = require('./routes/properties');
 
-
+log("Starting server...");
 
 app.use(helmet());
 app.use(cookieParser());
@@ -52,9 +52,8 @@ app.use('/login', loginRouter);
 app.use(authorization.doAuthorization);
 
 app.use('/', indexRouter);
-app.use("/files", express.static("./Minecraft"));//app.use("/files", filesRouter);
+app.use("/files", filesRouter); //app.use("/files", express.static("./Minecraft"));
 app.use("/accounts", accountsRouter);
-app.use("/account", accountsRouter);
 app.use("/properties", propertiesRouter);
 
 
@@ -67,7 +66,9 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
     log(req, req.url + " (" + (err.status || 500) + " " + err.message + ")");
     res.status(err.status || 500);
-    res.render('error', {title: "Game Server Control Panel", message: err.message, status: err.status});
+    let cssFile = "/stylesheets/error.css";
+    if ((new MobileDetect(req.headers['user-agent'])).mobile() !== null) cssFile = "/stylesheets/error-mobile.css";
+    res.render('error', {cssFile: cssFile, message: err.message, status: err.status});
 });
 
 app.set('views', path.join(__dirname, 'views'));
@@ -96,7 +97,12 @@ function httpRedirectServer() {
 }
 
 function log(req, text) {
-    console.log("[Webserver]  [" + strftime("%H:%M:%S") + "] [" + (req.ip) + "]: " + req.method + " " + text);
+    if (typeof req === "string") {
+        text = req;
+        console.log("[Webserver] [" + strftime("%H:%M:%S") + "]: " + text);
+    } else {
+        console.log("[Webserver] [" + strftime("%H:%M:%S") + "] [" + (req.ip) + "]: " + req.method + " " + text);
+    }
 }
 
 module.exports = {

@@ -1,0 +1,10 @@
+#frame {
+    width:80%;
+}
+
+#accounts {
+    height: 80%;
+}
+
+#accounts input:not([type="button"]) {
+}

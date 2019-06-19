@@ -37,9 +37,8 @@ $(document).ready(function() {
 
     var supportedTypes = ["txt", "json", "log", "properties", "yml"];
 
-    var filePath = location.pathname.replace("(?=\\?).*", "");
     var fileEditor = $("#fileContents");
-	$("#file").text(filePath);
+	//$("#file").text($("#file").text() + " " + filePath.substring("/files".length));
 
     if (supportedTypes.includes(filePath.split(".").pop())) {
         getFile(filePath);

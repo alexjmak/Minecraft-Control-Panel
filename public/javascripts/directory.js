@@ -7,7 +7,6 @@ $(document).ready(function() {
 
     $("#folder").text(location.pathname);
 
-    var folderContents = $("#foldercontents").text().split(",");
     var files = $("#files");
 
     for (var fileIndex in folderContents) {
@@ -20,7 +19,11 @@ $(document).ready(function() {
             backButton.prop("hidden", false);
             continue;
         }
-        files.append("" + location.pathname + "<a href=\"/?edit\">" + file + "" + file + "</a><br>")
+        files.append("<a href=\"" + location.pathname + "/" + file + "?edit\">" + file + "</a><br>")
     }
+
+    $("#back").click(function() {
+        window.open(location.pathname + "/..", "_self");
+    });
 
 });

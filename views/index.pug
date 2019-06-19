@@ -1,6 +1,9 @@
 extends layout
 
 block header
+    link(rel='stylesheet', type='text/css', href='/stylesheets/index.css')
+    link(class='mobileCSS' rel='stylesheet', type='text/css', href='/stylesheets/index-mobile.css' disabled)
+    script(type='text/javascript', src= "/javascripts/index.js")
     script.
         let online = ("#{online}" == "true");
         let version = parseInt("#{version}")
@@ -9,24 +12,24 @@ block header
         let memory = 0;
         let allocatedMemory = 0;
 
-
-
 block content
-    .box.mdc-elevation--z8(style='border-radius: 5px; width:80%; position:fixed; left:0; right:0; bottom:3%; top:10%; margin:auto; padding: 20px 20px 35px 20px;')
-        h2#title.demo-card__title.mdc-typography.mdc-typography--headline4(style='display: inline-block; margin-top: 0; margin-bottom: 0;')
-        h2#online.demo-card__title.mdc-typography.mdc-typography--headline4(style='font-size: 20px; float: right; display: inline-block; margin-top: 0; margin-bottom: 0;')
+    .box.mdc-elevation--z8
+        h2#title.demo-card__title.mdc-typography.mdc-typography--headline4
+        h2#online.demo-card__title.mdc-typography.mdc-typography--headline4
         br
-        h3.demo-card__subtitle.mdc-typography.mdc-typography--subtitle2(style='margin-top: 0; display: inline-block;')= address + ":" + port + " - " + hostname
-        h3#playerCount.demo-card__title.mdc-typography.mdc-typography--subtitle2(style='margin-top: 0; float: right;')= "v" + version + " (" + current_players + "/" + max_players + ")"
+        h3#serverInfo.demo-card__subtitle.mdc-typography.mdc-typography--subtitle2= address + ":" + port + " - " + hostname
+        h3#playerCount.demo-card__title.mdc-typography.mdc-typography--subtitle2= "v" + version + " (" + current_players + "/" + max_players + ")"
         #console.mdc-elevation--z4
-            p#console_text(style='margin-top: 0')
-            input#command(type='text', placeholder='Command', style='width: 100%;')
+            p#console_text
+            input#command(type='text', placeholder='Command' autocomplete='off' autocapitalize="none")
         br
         div
-            button#start.mdc-button.mdc-button--raised(style=" margin-right: 5px") Start
-            button#stop.mdc-button.mdc-button--raised(style='') Stop
+            button#start.mdc-button.mdc-button--raised Start
+            button#stop.mdc-button.mdc-button--raised Stop
+            button#restart.mdc-button.mdc-button--raised Restart
+
             span#processUsage(hidden)
-                #memoryBar.mdc-linear-progress(role='progressbar' style="float: right; width: 30%; display: inline-block;")
+                #memoryBar.mdc-linear-progress(role='progressbar')
                     .mdc-linear-progress__buffering-dots
                     .mdc-linear-progress__buffer
                     .mdc-linear-progress__bar.mdc-linear-progress__primary-bar
@@ -34,6 +37,6 @@ block content
                     .mdc-linear-progress__bar.mdc-linear-progress__secondary-bar
                         span.mdc-linear-progress__bar-inner
 
-                h3#memory.mdc-typography--subtitle2(style="position: relative; left: 30%; float:right; margin-bottom: 0; display: inline-block;padding-left: 3px")
-                h3.mdc-typography--subtitle2(style="position: relative; left: 30%; float:right; margin-bottom: 0; display: inline-block; ") Memory:
+                h3#memory.mdc-typography--subtitle2
+                h3#memoryTitle.mdc-typography--subtitle2 Memory:
 

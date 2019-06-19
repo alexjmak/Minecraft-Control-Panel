@@ -80,9 +80,9 @@ function start() {
         key: fs.readFileSync("./keys/https/key.key"),
         cert: fs.readFileSync("./keys/https/cert.crt")
     }, app);
-    httpsServer.listen(443);
+    httpsServer.listen(25564);
 
-    httpRedirectServer();
+    //httpRedirectServer();
 
     return httpsServer;
 }

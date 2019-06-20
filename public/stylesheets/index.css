@@ -20,6 +20,7 @@ body {
 
 #online {
     font-size: 20px; float: right; display: inline-block; margin-top: 0; margin-bottom: 0;
+    color: grey;
 }
 
 #serverInfo {

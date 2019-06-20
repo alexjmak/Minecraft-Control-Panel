@@ -4,29 +4,22 @@ block header
     link(rel='stylesheet', type='text/css', href='/stylesheets/index.css')
     link(class='mobileCSS' rel='stylesheet', type='text/css', href='/stylesheets/index-mobile.css' disabled)
     script(type='text/javascript', src= "/javascripts/index.js")
-    script.
-        let online = ("#{online}" == "true");
-        let version = parseInt("#{version}")
-        let current_players = parseInt("#{current_players}");
-        let max_players = parseInt("#{max_players}");
-        let memory = 0;
-        let allocatedMemory = 0;
 
 block content
     .box.mdc-elevation--z8
-        h2#title.demo-card__title.mdc-typography.mdc-typography--headline4
-        h2#online.demo-card__title.mdc-typography.mdc-typography--headline4
+        h2#title.demo-card__title.mdc-typography.mdc-typography--headline4= " "
+        h2#online.demo-card__title.mdc-typography.mdc-typography--headline4= "LOADING..."
         br
         h3#serverInfo.demo-card__subtitle.mdc-typography.mdc-typography--subtitle2= address + ":" + port + " - " + hostname
-        h3#playerCount.demo-card__title.mdc-typography.mdc-typography--subtitle2= "v" + version + " (" + current_players + "/" + max_players + ")"
+        h3#playerCount.demo-card__title.mdc-typography.mdc-typography--subtitle2
         #console.mdc-elevation--z4
             p#console_text
             input#command(type='text', placeholder='Command' autocomplete='off' autocapitalize="none")
         br
         div
-            button#start.mdc-button.mdc-button--raised Start
-            button#stop.mdc-button.mdc-button--raised Stop
-            button#restart.mdc-button.mdc-button--raised Restart
+            button#start.mdc-button.mdc-button--raised(disabled) Start
+            button#stop.mdc-button.mdc-button--raised(disabled) Stop
+            button#restart.mdc-button.mdc-button--raised(disabled) Restart
 
             span#processUsage(hidden)
                 #memoryBar.mdc-linear-progress(role='progressbar')

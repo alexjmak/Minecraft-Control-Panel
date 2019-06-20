@@ -14,9 +14,12 @@ $(document).ready(function() {
     var scrollDifference = consoleDiv[0].scrollHeight - consoleDiv.scrollTop();
     var noConnDialog;
     var restartClicked = false;
+    var firstRun = true;
 
 
     const memoryBar = mdc.linearProgress.MDCLinearProgress.attachTo(document.getElementById('memoryBar'));
+
+    let status = {};
 
     function updateWindow() {
         if ($(window).width() < 580) {
@@ -35,7 +38,13 @@ $(document).ready(function() {
         updateWindow();
     });
     var updateGameServerStatus = function() {
-        if (online) {
+        if (firstRun) {
+            firstRun = false;
+            $("#start").attr("disabled", false);
+            $("#stop").attr("disabled", false);
+            $("#restart").attr("disabled", false);
+        }
+        if (status.online) {
             if (restartClicked) {
                 $("#stop").attr("disabled", false);
                 $("#restart").attr("disabled", false);
@@ -45,12 +54,12 @@ $(document).ready(function() {
             $("#start").attr("disabled", false);
             $("#online").text("ONLINE");
             $("#online").css("color", "green");
-            $("#playerCount").text("v" + version + " (" + current_players + "/" + max_players + ")");
+            $("#playerCount").text("v" + status.version + " (" + status.current_players + "/" + status.max_players + ")");
             $("#start").hide();
             $("#stop").show();
             $("#restart").show();
-            $("#memory").text((memory/1000000000).toFixed(2) + "/" + (allocatedMemory/1000000000).toFixed(2) + " GB" + " (" + (memory/allocatedMemory * 100).toFixed(2) + "%)")
-            memoryBar.progress = memory/allocatedMemory;
+            $("#memory").text((status.memory/1000000000).toFixed(2) + "/" + (status.allocatedMemory/1000000000).toFixed(2) + " GB" + " (" + (status.memory/status.allocatedMemory * 100).toFixed(2) + "%)")
+            memoryBar.progress = status.memory/status.allocatedMemory;
             $("#processUsage").show();
 
         } else {
@@ -77,14 +86,10 @@ $(document).ready(function() {
                     automatic = false;
                     return;
                 }
-                var status = JSON.parse(xmlHttpRequest.responseText);
+                status = JSON.parse(xmlHttpRequest.responseText);
                 if (status.online === null) timeout = 5000;
-                online = status.online === true;
-                version = status.version;
-                current_players = status.current_players;
-                max_players = status.max_players;
-                memory = status.memory;
-                allocatedMemory = status.allocatedMemory;
+
+                status.online = status.online === true;
                 updateGameServerStatus();
             }
             if (automatic) {
@@ -222,7 +227,6 @@ $(document).ready(function() {
     });
 
     updateWindow();
-    updateGameServerStatus();
     getProperties();
     getLogHash(true);
     getGameServerStatus(true);

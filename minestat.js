@@ -21,7 +21,7 @@
 // For use with Node.js
 
 const NUM_FIELDS = 6;      // number of values expected from server
-const DEFAULT_TIMEOUT = 5; // default TCP timeout in seconds
+const DEFAULT_TIMEOUT = 3; // default TCP timeout in seconds
 address = null;
 port = null;
 online = null;             // online or offline?
@@ -95,7 +95,6 @@ module.exports =
     {
       callback();
       client.end();
-      process.exit();
     });
 
     client.on('end', () =>
@@ -107,6 +106,7 @@ module.exports =
     {
       // Uncomment the lines below to handle error codes individually. Otherwise,
       // call callback() and simply report the remote server as being offline.
+
 
       /*
       if(err.code == "ENOTFOUND")
@@ -121,8 +121,6 @@ module.exports =
         return;
       }
       */
-
-      callback();
 
       // Uncomment the line below for more details pertaining to network errors.
       //console.log(err);

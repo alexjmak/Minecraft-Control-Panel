@@ -12,18 +12,8 @@ const router = express.Router();
 
 router.get('/', function(req, res) {
     accountManager.getInformation("username", "id", authorization.getTokenSubject(req), function(username) {
-        minestat.init(req.hostname, 25565, function() {
-            let isMobile = (new MobileDetect(req.headers['user-agent'])).mobile() !== null;
-            res.render('index', {isMobile: isMobile, username: username, hostname: os.hostname(),
-                address: minestat.address,
-                port: minestat.port,
-                online: minestat.online === true,
-                version: minestat.version,
-                motd: minestat.motd,
-                current_players: minestat.current_players,
-                max_players: minestat.max_players,
-                latency: minestat.latency});
-        });
+        let isMobile = (new MobileDetect(req.headers['user-agent'])).mobile() !== null;
+        res.render('index', {isMobile: isMobile, username: username, hostname: os.hostname(), address: req.hostname, port: 25565});
     });
 
 
@@ -37,6 +27,7 @@ router.get('/log/hash', function(req, res) {
     let hash = crypto.createHash('md5').update(main.getLog().join("\n")).digest('hex');
     res.send(hash);
 });
+
 
 router.get('/status', function(req, res) {
     minestat.init(req.hostname, 25565, function() {

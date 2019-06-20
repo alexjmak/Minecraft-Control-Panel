@@ -27,7 +27,6 @@ app.use(express.urlencoded({
     extended: true
 }));
 
-
 app.use(function(req, res, next) {
     if (req.path.endsWith("/") && req.path !== "/") {
         res.redirect(req.path.substring(0, req.path.length - 1));
@@ -60,6 +59,7 @@ app.use("/properties", propertiesRouter);
 app.enable("trust proxy");
 
 app.use(function(req, res, next) {
+
     next(createError(404));
 });
 

@@ -51,7 +51,7 @@ app.use('/login', loginRouter);
 app.use(authorization.doAuthorization);
 
 app.use('/', indexRouter);
-app.use("/files", filesRouter); //app.use("/files", express.static("./Minecraft"));
+app.use("/files", filesRouter);
 app.use("/accounts", accountsRouter);
 app.use("/properties", propertiesRouter);
 

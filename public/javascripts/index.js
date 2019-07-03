@@ -87,11 +87,14 @@ $(document).ready(function() {
                     return;
                 }
                 status = JSON.parse(xmlHttpRequest.responseText);
-                if (status.online === null) timeout = 5000;
-
-                status.online = status.online === true;
-                updateGameServerStatus();
             }
+            if (xmlHttpRequest.status !== 200) status = {online: null};
+
+            if (status.online === null) timeout = 5000;
+
+            status.online = status.online === true;
+            updateGameServerStatus();
+
             if (automatic) {
                 window.setTimeout(getGameServerStatus, timeout, true);
             }

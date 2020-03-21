@@ -41,7 +41,7 @@ $(document).ready(function() {
     }
 
     let accountCard = $("#accountCard");
-    if ($.cookie("token") !== undefined) {
+    if ($.cookie("loginToken") !== undefined) {
         accountCard.first().find("h3").text("ID: " + parseJwt($.cookie("loginToken")).aud);
     }
 

@@ -2,16 +2,15 @@ extends layout
 
 block header
     link(rel='stylesheet', type='text/css', href='/stylesheets/index.css')
-    link(class='mobileCSS' rel='stylesheet', type='text/css', href='/stylesheets/index-mobile.css' disabled)
     script(type='text/javascript', src= "/javascripts/index.js")
 
 block content
     .box.mdc-elevation--z8
-        h2#title.demo-card__title.mdc-typography.mdc-typography--headline4= " "
-        h2#online.demo-card__title.mdc-typography.mdc-typography--headline4= "LOADING..."
+        h2#title.mdc-typography.mdc-typography--headline4= " "
+        h2#online.mdc-typography.mdc-typography--headline4= "LOADING..."
         br
-        h3#serverInfo.demo-card__subtitle.mdc-typography.mdc-typography--subtitle2= address + ":" + port + " - " + hostname
-        h3#playerCount.demo-card__title.mdc-typography.mdc-typography--subtitle2
+        h3#serverInfo.mdc-typography.mdc-typography--subtitle2= address + ":" + port + " - " + hostname
+        h3#playerCount.mdc-typography.mdc-typography--subtitle2
         #console.mdc-elevation--z4
             p#console_text
             input#command(type='text', placeholder='Command' autocomplete='off' autocapitalize="none")

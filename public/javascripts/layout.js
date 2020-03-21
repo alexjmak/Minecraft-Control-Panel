@@ -1,7 +1,4 @@
 $(document).ready(function() {
-    if (isMobile) {
-        $('.mobileCSS').removeAttr('disabled');
-    }
     if (window.location.pathname === "/login") {
         $('#accountButton').attr("disabled", true);
     }
@@ -22,9 +19,30 @@ $(document).ready(function() {
         drawer.open = true;
     });
 
+    let textFields = document.getElementsByClassName('mdc-text-field');
+    for (let i = 0; i < textFields.length; i++) {
+        new mdc.textField.MDCTextField(textFields[i]);
+    }
+
+    let buttons = document.getElementsByClassName('mdc-button');
+    for (let i = 0; i < buttons.length; i++) {
+        mdc.ripple.MDCRipple.attachTo(buttons[i]);
+    }
+
+    let iconButtons = document.getElementsByClassName('mdc-icon-button');
+    for (let i = 0; i < iconButtons.length; i++) {
+        new mdc.ripple.MDCRipple(iconButtons[i]).unbounded = true;
+    }
+
+    let checkBoxes = $('.mdc-checkbox');
+    for (let i = 0; i < checkBoxes.length; i++) {
+        new mdc.checkbox.MDCCheckbox(checkBoxes[i]);
+
+    }
+
     let accountCard = $("#accountCard");
     if ($.cookie("token") !== undefined) {
-        accountCard.first().find("h3").text("ID: " + parseJwt($.cookie("token")).subject);
+        accountCard.first().find("h3").text("ID: " + parseJwt($.cookie("loginToken")).aud);
     }
 
     $(document).mouseup(function (e) {
@@ -36,7 +54,7 @@ $(document).ready(function() {
 
             }
         }
-    })
+    });
 
     $("#currentUsername").click(function() {
         if (!accountCard.is(":visible")) {

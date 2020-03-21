@@ -6,7 +6,7 @@ $(document).ready(function() {
     var initialMD5 = null;
 
     var getProperties = function() {
-        getRequest("/files/server.properties", function(xmlHttpRequest) {
+        getRequest("/files/server.properties?download", function(xmlHttpRequest) {
             if (xmlHttpRequest.status === 200) {
                 var propertiesList = xmlHttpRequest.responseText.trim().split("\n");
                 for (var line in propertiesList) {

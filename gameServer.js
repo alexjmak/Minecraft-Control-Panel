@@ -9,9 +9,14 @@ let onCloseFunction;
 
 function start(cwd) {
     log("[" + strftime("%H:%M:%S") + "]: Starting server...");
+
     gameServer = child_process.spawn('java',  ["-Xmx" +  allocatedMemory + "M",  "-Xms" + allocatedMemory + "M", "-jar", "server.jar", "nogui"], {cwd: cwd});
 
     running = true;
+
+    gameServer.on('error', function(err) {
+        log("[" + strftime("%H:%M:%S") + "]: " + err);
+    });
 
     gameServer.on('close', function (code) {
         running = false;
@@ -50,7 +55,7 @@ function getUsage(next) {
 }
 
 function command(command) {
-    if (gameServer != undefined) gameServer.stdin.write(command + "\n");
+    if (gameServer !== undefined) gameServer.stdin.write(command + "\n");
 }
 
 function log(text) {

@@ -11,16 +11,20 @@
   "license": "ISC",
   "dependencies": {
     "@types/express": "^4.16.1",
+    "archiver": "^3.1.1",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.4",
     "express": "^4.17.1",
-    "helmet": "^3.18.0",
+    "helmet": "^3.21.3",
     "http-errors": "latest",
     "jsonwebtoken": "^8.5.1",
     "mobile-detect": "^1.4.3",
     "pidusage": "^2.0.17",
     "pug": "^2.0.3",
-    "sqlite3": "^4.0.8",
-    "strftime": "^0.10.0"
+    "readify": "^7.0.3",
+    "request": "^2.88.2",
+    "sqlite3": "^4.1.1",
+    "strftime": "^0.10.0",
+    "unzipper": "^0.10.10"
   }
 }

@@ -64,8 +64,7 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
     log(req, req.url + " (" + (err.status || 500) + " " + err.message + ")");
     res.status(err.status || 500);
-    let cssFile = "/stylesheets/error.css";
-        res.render('error', {message: err.message, status: err.status});
+    res.render('error', {message: err.message, status: err.status});
 });
 
 app.set('views', path.join(__dirname, 'views'));

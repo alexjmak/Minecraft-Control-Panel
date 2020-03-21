@@ -2,16 +2,14 @@ const express = require('express');
 const os = require('os');
 const fs = require('fs');
 const crypto = require('crypto');
-const MobileDetect = require('mobile-detect');
 const accountManager = require('../accountManager');
 const authorization = require('../authorization');
 
 const router = express.Router();
 
 router.get('/', function(req, res) {
-    accountManager.getInformation("username", "id", authorization.getTokenSubject(req), function(username) {
-        let isMobile = (new MobileDetect(req.headers['user-agent'])).mobile() !== null;
-        res.render('properties', {isMobile: isMobile, username: username, hostname: os.hostname()});
+    accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function(username) {
+        res.render('properties', {username: username, hostname: os.hostname()});
     });
 });
 
@@ -21,7 +19,7 @@ router.get('/hash', function(req, res) {
 });
 
 router.post('/update', function(req, res) {
-    accountManager.getInformation("privilege", "id", authorization.getTokenSubject(req), function(privilege) {
+    accountManager.getInformation("privilege", "id", authorization.getLoginTokenAudience(req), function(privilege) {
         if (privilege > 0) {
             let fileContents = fs.readFileSync("./Minecraft/server.properties").toString();
             let keys = Object.keys(req.body);

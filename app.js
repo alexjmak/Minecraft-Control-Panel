@@ -2,6 +2,8 @@ const gameServer = require("./gameServer");
 
 let log = [];
 
+
+
 function command(command) {
     if (typeof command !== "object") console.log(command);
     else command = command.toString();
@@ -67,3 +69,11 @@ webServer.start();
 process.stdin.on("data", command);
 
 
+process.on('SIGINT', function () {
+    if (gameServer.isRunning()) {
+        command("exit");
+    } else {
+        process.exit();
+    }
+
+});

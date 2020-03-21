@@ -2,22 +2,26 @@ extends layout
 
 block header
     link(rel='stylesheet', type='text/css', href='/stylesheets/fileEditor.css')
-    link(class='mobileCSS' rel='stylesheet', type='text/css', href='/stylesheets/fileEditor-mobile.css' disabled)
     script.
         let filePath = "#{file.path}";
     script(type='text/javascript', src= "/javascripts/fileEditor.js")
 
 block content
-    #frame.box.mdc-elevation--z8
-        h2#file.mdc-typography.mdc-typography--headline4(style='margin-top: 5px; margin-bottom: 3px;') File Editor: #{file.path}
-        h3#computername.mdc-typography.mdc-typography--subtitle2(style='margin-top: 0; margin-bottom:5px')= hostname
-        #fileContents.box(contenteditable='true')
+    div#content(hidden)
+
+
+    #authorization.box.mdc-card.mdc-elevation--z8(style="display: none")
+        .demo-card__primary
+            #title.demo-card__title.mdc-typography.mdc-typography--headline4 Password Required
         br
-        div
-            button#back.mdc-button.mdc-button--raised Back
-            button#save.mdc-button.mdc-button--raised Save
-            button#revert.mdc-button.mdc-button--raised Revert
-            button#raw.mdc-button.mdc-button--raised Download
+        .mdc-text-field
+            input#password.mdc-text-field__input(type='password' tabindex=1)
+            .mdc-line-ripple
+            label.mdc-floating-label Password
+        p#message
+        button#submit.mdc-button.mdc-button--raised Submit
+
+
 
 
     

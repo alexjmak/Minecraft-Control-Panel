@@ -9,7 +9,6 @@ body {
     font-family: Roboto, Arial, Helvetica, sans-serif;
     background-color: #f7f7f7;
     margin: 0;
-
 }
 
 .box {
@@ -52,3 +51,4 @@ pre {
 a:visited {
     color: blue;
 }
+

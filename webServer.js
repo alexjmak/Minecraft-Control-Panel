@@ -5,7 +5,6 @@ const fs = require("fs");
 const path = require("path");
 const strftime = require('strftime');
 const cookieParser = require('cookie-parser');
-const MobileDetect = require('mobile-detect');
 const helmet = require("helmet");
 
 const authorization = require('./authorization');
@@ -17,6 +16,7 @@ const filesRouter = require('./routes/files');
 const indexRouter = require('./routes/index');
 const loginRouter = require('./routes/login');
 const logoutRouter = require('./routes/logout');
+const updateRouter = require('./routes/update');
 const propertiesRouter = require('./routes/properties');
 
 log("Starting server...");
@@ -45,11 +45,9 @@ app.use(function(req, res, next) {
 
 
 app.use('/logout', logoutRouter);
-
 app.use('/login', loginRouter);
-
+app.use("/update", updateRouter);
 app.use(authorization.doAuthorization);
-
 app.use('/', indexRouter);
 app.use("/files", filesRouter);
 app.use("/accounts", accountsRouter);
@@ -67,8 +65,7 @@ app.use(function(err, req, res, next) {
     log(req, req.url + " (" + (err.status || 500) + " " + err.message + ")");
     res.status(err.status || 500);
     let cssFile = "/stylesheets/error.css";
-    if ((new MobileDetect(req.headers['user-agent'])).mobile() !== null) cssFile = "/stylesheets/error-mobile.css";
-    res.render('error', {cssFile: cssFile, message: err.message, status: err.status});
+        res.render('error', {message: err.message, status: err.status});
 });
 
 app.set('views', path.join(__dirname, 'views'));

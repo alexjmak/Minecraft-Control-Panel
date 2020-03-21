@@ -1,11 +1,12 @@
-const database = require("./database");
-const crypto = require("crypto");
+const strftime = require('strftime');
+const database = require("./databaseInit");
 
-let accountDatabase = new database.Database("./accounts.db");
-
-accountDatabase.run("CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY, username TEXT NOT NULL UNIQUE, hash TEXT NOT NULL, salt TEXT NOT NULL, enabled INTEGER NOT NULL DEFAULT 1, privilege INTEGER NOT NULL DEFAULT 0);");
-
-newAccount("admin", "password", Number.MAX_SAFE_INTEGER);
+database.run("CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY, username TEXT NOT NULL UNIQUE, hash TEXT NOT NULL, salt TEXT NOT NULL, enabled INTEGER NOT NULL DEFAULT 1, privilege INTEGER NOT NULL DEFAULT 0);", [], function(result) {
+    newAccount("admin", "password", 100);
+    getInformation("id", "username", "admin", function(id) {
+        updatePrivilege(id, 100);
+    });
+});
 
 function accountExists(usernameOrID, enabledCheck, next) {
     let query;
@@ -20,7 +21,7 @@ function accountExists(usernameOrID, enabledCheck, next) {
     }
     if (enabledCheck) query += " AND enabled = 1";
 
-    accountDatabase.all(query, usernameOrID, function(result) {
+    database.all(query, usernameOrID, function(result) {
         if (result.length === 1) {
             if (next !== undefined) next(true);
         } else {
@@ -30,8 +31,46 @@ function accountExists(usernameOrID, enabledCheck, next) {
     });
 }
 
-function getAccountsSummary(next) {
-    accountDatabase.all("SELECT id, username, enabled, privilege FROM accounts ORDER BY username COLLATE NOCASE", null,function (results) {
+function getAccountsSummary(id, next) {
+    getInformation("privilege", "id", id, function(privilege) {
+        getInformation("username", "id", id, function(username) {
+            database.all("SELECT id, username, enabled, privilege FROM accounts WHERE ? OR id = ? OR privilege < ? ORDER BY username COLLATE NOCASE", [username === "admin", id, privilege], function (results) {
+                let resultsById = {};
+                for (let result in results) {
+                    if (results.hasOwnProperty(result)) {
+                        result = results[result];
+                        let id = result.id;
+                        delete result[id];
+                        resultsById[id] = result;
+                    }
+                }
+                if (next !== undefined) next(results);
+            });
+        });
+    });
+}
+
+function getDeletedAccountsSummary(id, next) {
+    getInformation("privilege", "id", id, function(privilege) {
+        getInformation("username", "id", id, function(username) {
+            database.all("SELECT id, username, privilege, dateDeleted FROM deleted_accounts WHERE ? OR id = ? OR privilege < ? ORDER BY username COLLATE NOCASE", [username === "admin", id, privilege], function (results) {
+                let resultsById = {};
+                for (let result in results) {
+                    if (results.hasOwnProperty(result)) {
+                        result = results[result];
+                        let id = result.id;
+                        delete result[id];
+                        resultsById[id] = result;
+                    }
+                }
+                if (next !== undefined) next(results);
+            });
+        });
+    });
+}
+
+function searchAccounts(query, next) {
+    database.all("SELECT id, username FROM accounts WHERE username LIKE ?", "%" + query + "%", function (results) {
         let resultsById = {};
         for (let result in results) {
             if (results.hasOwnProperty(result)) {
@@ -41,20 +80,20 @@ function getAccountsSummary(next) {
                 resultsById[id] = result;
             }
         }
-        if (next != undefined) next(results);
+        if (next !== undefined) next(results);
     });
 }
 
 function getInformation(select, whereKey, whereValue, next) {
-    accountDatabase.get("SELECT " + select + " FROM accounts WHERE " + whereKey + " = ?", whereValue, function(result) {
+    database.get("SELECT " + select + " FROM accounts WHERE " + whereKey + " = ?", whereValue, function(result) {
         if (next !== undefined) next(result[select]);
     });
 }
 
 
 function nextID(next) {
-    accountDatabase.get("SELECT * FROM accounts ORDER BY id DESC", null, function(result) {
-        if (result !== false) {
+    database.get("SELECT max(id) as id FROM (SELECT id FROM accounts UNION SELECT id FROM deleted_accounts);", null, function(result) {
+        if (result.id !== null) {
             if (next !== undefined) next(result.id + 1);
         } else {
             if (next !== undefined) next(0);
@@ -69,30 +108,34 @@ function newAccount(username, password, privilege, next) {
             return
         }
 
-        let salt = generateSalt();
-        let hash = getHash(password, salt);
+        const authorization = require("./authorization");
+        let salt = authorization.generateSalt();
+        let hash = authorization.getHash(password, salt);
 
         nextID(function(id) {
-            accountDatabase.run("INSERT INTO accounts (id, username, hash, salt, privilege) VALUES (?, ?, ?, ?, ?)", [id, username, hash, salt, privilege], function(result) {
+            database.run("INSERT INTO accounts (id, username, hash, salt, privilege) VALUES (?, ?, ?, ?, ?)", [id, username, hash, salt, privilege], function(result) {
                 if (!result && username !== undefined && password !== undefined && privilege !== undefined) {
                     newAccount(username, password, privilege, next);
                 } else if (next !== undefined) next(result);
 
-            })
+            });
         });
+
     });
 }
 
 function deleteAccount(id, next) {
     accountExists(id, false, function(result) {
-        if (!result) {
-            if (next !== undefined) next(false);
-            return
-        }
+        getInformation("username", "id", id, function(username) {
+            if (!result) {
+                if (next !== undefined) next(false);
+                return
+            }
 
-        accountDatabase.run("DELETE FROM accounts WHERE id = ?", id, function(result) {
-            if (next !== undefined) next(result);
-        });
+            database.run("DELETE FROM accounts WHERE id = ?", id, function (result) {
+                if (next !== undefined) next(result);
+            });
+        })
     });
 }
 
@@ -103,7 +146,7 @@ function enableAccount(id, next) {
             return;
         }
 
-        accountDatabase.run("UPDATE accounts SET enabled = 1 WHERE id = ?", id, function(result) {
+        database.run("UPDATE accounts SET enabled = 1 WHERE id = ?", id, function(result) {
             if (next !== undefined) next(result);
         });
 
@@ -117,7 +160,7 @@ function disableAccount(id, next) {
             return;
         }
 
-        accountDatabase.run("UPDATE accounts SET enabled = 0 WHERE id = ?", id, function(result) {
+        database.run("UPDATE accounts SET enabled = 0 WHERE id = ?", id, function(result) {
             if (next !== undefined) next(result);
         });
 
@@ -137,7 +180,7 @@ function updateUsername(id, newUsername, next) {
                 return;
             }
 
-            accountDatabase.run("UPDATE accounts SET username = ? WHERE id = ?", [newUsername, id], function(result) {
+            database.run("UPDATE accounts SET username = ? WHERE id = ?", [newUsername, id], function(result) {
                 if (next !== undefined) next(result);
             });
         });
@@ -152,41 +195,45 @@ function updatePassword(id, newPassword, next) {
             return;
         }
 
-        let newSalt = generateSalt();
-        let newHash = getHash(newPassword, newSalt);
+        const authorization = require("./authorization");
+        let newSalt = authorization.generateSalt();
+        let newHash = authorization.getHash(newPassword, newSalt);
 
-        accountDatabase.run("UPDATE accounts SET hash = ?, salt = ? WHERE id = ?", [newHash, newSalt, id], function(result) {
+        database.run("UPDATE accounts SET hash = ?, salt = ? WHERE id = ?", [newHash, newSalt, id], function(result) {
             if (next !== undefined) next(result);
         });
     });
 }
 
 function updatePrivilege(id, newPrivilege, next) {
+    if (newPrivilege >= 100) newPrivilege = 100;
     accountExists(id, false, function(result) {
         if (!result) {
             if (next !== undefined) next(false);
             return;
         }
 
-        accountDatabase.run("UPDATE accounts SET privilege = ? WHERE id = ?", [newPrivilege, id], function(result) {
+        database.run("UPDATE accounts SET privilege = ? WHERE id = ?", [newPrivilege, id], function(result) {
             if (next !== undefined) next(result);
         });
 
     });
 }
 
-function generateSalt() {
-    return crypto.randomBytes(16).toString("hex");
-}
-
-function getHash(password, salt) {
-    return crypto.createHmac('sha512', salt).update(password).digest('hex');
+function log(req, text) {
+    if (typeof req === "string") {
+        text = req;
+        console.log("[Account Manager] [" + strftime("%H:%M:%S") + "]: " + text);
+    } else {
+        console.log("[Account Manager] [" + strftime("%H:%M:%S") + "] [" + (req.ip) + "]: " + req.method + " " + text);
+    }
 }
 
 module.exports = {
-    accountDatabase: accountDatabase,
     accountExists: accountExists,
     getAccountsSummary: getAccountsSummary,
+    getDeletedAccountsSummary: getDeletedAccountsSummary,
+    searchAccounts: searchAccounts,
     getInformation: getInformation,
     newAccount: newAccount,
     deleteAccount: deleteAccount,
@@ -195,5 +242,4 @@ module.exports = {
     updateUsername: updateUsername,
     updatePassword: updatePassword,
     updatePrivilege: updatePrivilege,
-    getHash: getHash
 };

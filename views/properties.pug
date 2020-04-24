@@ -11,10 +11,10 @@ block drawer
             h6.mdc-drawer__subtitle= hostname
         .mdc-drawer__content
             nav.mdc-list
-                a.mdc-list-item.mdc-list-item--activated(href='/')
+                a.mdc-list-item(href='/')
                     i.material-icons.mdc-list-item__graphic(aria-hidden='true') code
                     span.mdc-list-item__text Console
-                a.mdc-list-item(href='/properties')
+                a.mdc-list-item.mdc-list-item--activated(href='/properties')
                     i.material-icons.mdc-list-item__graphic(aria-hidden='true') list
                     span.mdc-list-item__text Server Properties
                 a.mdc-list-item(href='/accounts')

@@ -7,8 +7,11 @@ $(document).ready(function() {
         });
     }
 
-    const topAppBar = mdc.topAppBar.MDCTopAppBar.attachTo(document.querySelector('.mdc-top-app-bar'));
+    if ($(".mdc-drawer").length === 0) {
+        $(".mdc-top-app-bar__navigation-icon").hide();
+    }
 
+    const topAppBar = mdc.topAppBar.MDCTopAppBar.attachTo(document.querySelector('.mdc-top-app-bar'));
 
     let drawer;
     topAppBar.listen('MDCTopAppBar:nav', function () {
@@ -37,19 +40,6 @@ $(document).ready(function() {
         new mdc.checkbox.MDCCheckbox(checkBoxes[i]);
 
     }
-
-    /*
-    let listItems = $(".mdc-list-item");
-    listItems.each(function() {
-        let listItem = $(this);
-        if ((window.location.pathname + "/").startsWith(listItem.attr("href") + "/")) {
-            listItems.removeClass("mdc-list-item--activated");
-            listItem.attr("class", "mdc-list-item mdc-list-item--activated");
-            return false;
-        }
-    });
-
-    */
 
     let accountCard = $("#accountCard");
     if ($.cookie("loginToken") !== undefined) {

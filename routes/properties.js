@@ -4,6 +4,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const accountManager = require('../accountManager');
 const authorization = require('../authorization');
+const preferences = require('../preferences');
 
 const router = express.Router();
 
@@ -14,14 +15,14 @@ router.get('/', function(req, res) {
 });
 
 router.get('/hash', function(req, res) {
-    const fileContents = fs.readFileSync("./Minecraft/server.properties");
+    const fileContents = fs.readFileSync(path.join(preferences.get("files"), "server.properties"));
     res.send(crypto.createHash('md5').update(fileContents).digest('hex'));
 });
 
-router.post('/update', function(req, res) {
+router.patch('/update', function(req, res) {
     accountManager.getInformation("privilege", "id", authorization.getLoginTokenAudience(req), function(privilege) {
         if (privilege > 0) {
-            let fileContents = fs.readFileSync("./Minecraft/server.properties").toString();
+            let fileContents = fs.readFileSync(path.join(preferences.get("files"), "server.properties")).toString();
             let keys = Object.keys(req.body);
             for (let key in keys) {
                 if (keys.hasOwnProperty(key)) {
@@ -33,7 +34,7 @@ router.post('/update', function(req, res) {
                     fileContents = newFileContents;
                 }
             }
-            fs.writeFile("./Minecraft/server.properties", fileContents, function(err) {
+            fs.writeFile(path.join(preferences.get("files"), "server.properties"), fileContents, function(err) {
                 if (err) return res.status(404).send("Cannot update server properties");
                 res.send("Updated " + keys.length + " properties");
             });

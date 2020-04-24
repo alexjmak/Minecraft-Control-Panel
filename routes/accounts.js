@@ -1,15 +1,28 @@
+const createError = require('http-errors');
+const crypto = require('crypto');
 const express = require('express');
 const os = require('os');
-const crypto = require('crypto');
-const createError = require('http-errors');
-const authorization = require('../authorization');
+
 const accountManager = require('../accountManager');
+const authorization = require('../authorization');
 
 const router = express.Router();
 
 router.get('/', function(req, res) {
     accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function(username) {
         res.render('accounts', {username: username, hostname: os.hostname(), recover: false});
+    });
+});
+
+router.get('/recover', function(req, res) {
+    accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function(username) {
+        res.render('accounts', {username: username, hostname: os.hostname(), recover: true});
+    });
+});
+
+router.get('/recover/list', function(req, res) {
+    accountManager.getDeletedAccountsSummary(authorization.getLoginTokenAudience(req), function (result) {
+        res.json(result);
     });
 });
 
@@ -36,21 +49,24 @@ router.get('/search', function(req, res, next) {
     }
 });
 
-router.post('/new', function(req, res) {
+router.put('/new', function(req, res) {
     let username = req.body.username;
     let password = req.body.password;
     let privilege = req.body.privilege;
+    let encrypted = req.body.encrypted;
+
     if (!checkRequiredFields(res, username, password)) return;
     if (username === "admin")  return res.status(401).send("Insufficient privilege level");
 
     checkPrivilege(req, res, undefined, function(result) {
         if (!result) return;
-
+        if (encrypted === undefined) encrypted = false;
         if (privilege === undefined) privilege = 0;
-        else if (privilege > 100 || privilege.toUpperCase() === "ADMIN") privilege = 100;
+        else if (privilege > 100 || privilege.toString().toUpperCase() === "ADMIN") privilege = 100;
+        encrypted = encrypted === "true" || encrypted === true;
         checkChangePrivilege(req, res, privilege, function(result) {
             if(!result) return;
-            accountManager.newAccount(username, password, privilege, function (result) {
+            accountManager.newAccount(username, password, privilege, encrypted, function (result) {
                 if (result) {
                     res.send("Created account: " + username);
                 } else {
@@ -61,72 +77,106 @@ router.post('/new', function(req, res) {
     });
 });
 
-router.post('/delete', function(req, res) {
-    let id = parseInt(req.body.id, 10);
+router.delete('/delete', function(req, res) {
+    let id = parseInt(req.body.id);
 
     if (!checkRequiredFields(res, id)) return;
 
-    checkPrivilege(req, res, id, function(result) {
-        if (!result) return;
-        accountManager.deleteAccount(id, function(result) {
-            if (result) {
-                res.send("Deleted account");
-            } else {
-                res.status(404).send("Account not found");
-            }
+    accountManager.getInformation("username", "id", id, function(username) {
+        if (username === "admin") return res.status(403).send("Cannot delete the admin account");
+        checkPrivilege(req, res, id, function(result) {
+            if (!result) return;
+            accountManager.deleteAccount(id, function(result) {
+                if (result) {
+                    res.send("Deleted account");
+                } else {
+                    res.status(404).send("Account not found");
+                }
+            });
         });
     });
 
+
 });
 
-router.post('/recover', function(req, res) {
+router.patch('/recover', function(req, res) {
     //todo
 });
 
-router.post('/enable', function(req, res) {
-    let id = parseInt(req.body.id, 10);
+router.patch('/encrypted', function(req, res) {
+    let id = parseInt(req.body.id);
+    let encrypted = req.body.encrypted;
+    let password = req.body.password;
 
-    if (!checkRequiredFields(res, id)) return;
-
-    checkPrivilege(req, res, id, function(result) {
-        if (!result) return;
-        accountManager.enableAccount(id, function (result) {
-            if (result) {
-                res.send("Enabled account");
-            } else {
-                res.status(404).send("Account not found");
-            }
-        });
-    });
-});
-
-router.post('/disable', function(req, res) {
-    let id = parseInt(req.body.id, 10);
-
-    if (!checkRequiredFields(res, id)) return;
-
-    if (Number(authorization.getLoginTokenAudience(req)) === id) {
-        res.status(404).send("Cannot disable your own account");
-        return;
-    }
+    if (!checkRequiredFields(res, id, encrypted, password)) return;
 
     checkPrivilege(req, res, id, function(result) {
         if (!result) return;
-        accountManager.disableAccount(id, function (result) {
-            if (result) {
-                res.send("Disabled account");
+        authorization.checkPassword(id, password, function(result) {
+            if (result !== 1) {
+                if (encrypted) {
+                    accountManager.encryptAccount(id, password,function (result) {
+                        if (result) {
+                            res.send("Encrypted account");
+                        } else {
+                            res.status(404).send("Account not found");
+                        }
+                    });
+                } else {
+                    accountManager.decryptAccount(id, function (result) {
+                        if (result) {
+                            res.send("Decrypted account");
+                        } else {
+                            res.status(404).send("Account not found");
+                        }
+                    });
+                }
             } else {
-                res.status(404).send("Account not found");
+                res.status(403).send("Incorrect Password");
             }
-        });
+        })
 
     });
-
 });
 
-router.post('/update/username', function(req, res) {
-    let id = parseInt(req.body.id, 10);
-    let new_username = req.body.new_username;
+
+router.patch('/enabled', function(req, res) {
+    let id = parseInt(req.body.id);
+    let enabled = req.body.enabled;
+
+    if (!checkRequiredFields(res, id, enabled)) return;
+
+    checkPrivilege(req, res, id, function(result) {
+        if (!result) return;
+        if (enabled) {
+            accountManager.enableAccount(id, function (result) {
+                if (result) {
+                    res.send("Enabled account");
+                } else {
+                    res.status(404).send("Account not found");
+                }
+            });
+        } else {
+            if (Number(authorization.getLoginTokenAudience(req)) === id) {
+                res.status(404).send("Cannot disable your own account");
+                return;
+            }
+            accountManager.disableAccount(id, function (result) {
+                if (result) {
+                    res.send("Disabled account");
+                } else {
+                    res.status(404).send("Account not found");
+                }
+            });
+        }
+
+    });
+});
+
+router.patch('/username', function(req, res) {
+    let id = parseInt(req.body.id);
+    let new_username = req.body.username;
+
     if (!checkRequiredFields(res, id, new_username)) return;
     checkPrivilege(req, res, id, function(result) {
         if (!result) return;
@@ -140,9 +190,9 @@ router.post('/update/username', function(req, res) {
     });
 });
 
-router.post('/update/password', function(req, res) {
-    let id = parseInt(req.body.id, 10);
-    let new_password = req.body.new_password;
+router.patch('/password', function(req, res) {
+    let id = parseInt(req.body.id);
+    let new_password = req.body.password;
     if (!checkRequiredFields(res, id, new_password)) return;
     checkPrivilege(req, res, id, function(result) {
         if (!result) return;
@@ -157,13 +207,14 @@ router.post('/update/password', function(req, res) {
     });
 });
 
-router.post('/update/privilege', function(req, res) {
-    let id = parseInt(req.body.id, 10);
-    let new_privilege = req.body.new_privilege;
+router.patch('/privilege', function(req, res) {
+    let id = parseInt(req.body.id);
+    let new_privilege = req.body.privilege;
+
     if (!checkRequiredFields(res, id, new_privilege)) return;
     checkPrivilege(req, res, id, function(result) {
         if (!result) return;
-        if (new_privilege > 100 || new_privilege.toUpperCase() === "ADMIN") new_privilege = 100;
+        if (new_privilege > 100 || new_privilege.toString().toUpperCase() === "ADMIN") new_privilege = 100;
         checkChangePrivilege(req, res, new_privilege, function(result) {
             if (!result) return;
             accountManager.updatePrivilege(id, new_privilege, function (result) {
@@ -180,6 +231,7 @@ router.post('/update/privilege', function(req, res) {
 
 function checkRequiredFields(res, ...fields) {
     for (let field in fields) {
+        field = fields[field];
         if (field === undefined) {
             res.status(404).send("Missing required fields");
             return false;

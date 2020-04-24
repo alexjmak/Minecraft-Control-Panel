@@ -2,8 +2,6 @@ const fs = require('fs');
 const jwt = require("jsonwebtoken");
 const database = require("./databaseInit");
 const crypto = require("crypto");
-const child_process = require("child_process");
-const strftime = require('strftime');
 const accountManager = require("./accountManager");
 const log = require("./log");
 

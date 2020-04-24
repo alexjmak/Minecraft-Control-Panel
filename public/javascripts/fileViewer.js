@@ -77,6 +77,7 @@ var revert = function(event) {
 };
 
 var deleteFile = function(event) {
+    if (window.location.pathname.startsWith("/shared")) return;
     let fileName = event.data.filePath.split("/").pop();
     showDialog(yesNoDialog, "Minecraft Control Panel", "Are you sure you want to delete " + fileName  + "?", {"yes": function() {
             deleteRequest(event.data.filePath, null, function(xmlHttpRequest) {
@@ -158,7 +159,6 @@ $(document).ready(function() {
 
     filePath = pathSplit[pathSplit.length - 1];
     $(".mdc-drawer__title").text(filePath);
-
 
     getFile(filePath, "authorize");
 

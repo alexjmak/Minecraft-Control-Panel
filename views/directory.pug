@@ -14,7 +14,18 @@ block drawer
             h6.mdc-drawer__subtitle= hostname
         .mdc-drawer__content
             nav.mdc-list
-                a.mdc-list-item.mdc-list-item--activated(href='/')
+                a.mdc-list-item.mdc-list-item--activated(href='/files')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') folder
+                    span.mdc-list-item__text File Manager
+                a.mdc-list-item#upload
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') cloud_upload
+                    span.mdc-list-item__text Upload
+                input#uploadButton(hidden type="file" multiple)
+                a.mdc-list-item(href='/files/.recycle')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') delete
+                    span.mdc-list-item__text Trash
+                .mdc-list-divider
+                a.mdc-list-item(href='/')
                     i.material-icons.mdc-list-item__graphic(aria-hidden='true') code
                     span.mdc-list-item__text Console
                 a.mdc-list-item(href='/properties')
@@ -23,9 +34,6 @@ block drawer
                 a.mdc-list-item(href='/accounts')
                     i.material-icons.mdc-list-item__graphic(aria-hidden='true') account_circle
                     span.mdc-list-item__text Account Manager
-                a.mdc-list-item(href='/files')
-                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') folder
-                    span.mdc-list-item__text File Manager
                 .mdc-list-divider
                 a.mdc-list-item(href='/logout')
                     i.material-icons.mdc-list-item__graphic(aria-hidden='true') launch

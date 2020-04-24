@@ -81,15 +81,7 @@ $(document).ready(function() {
         if (Object.keys(propertiesDictionary).length == 0) {
             showSnackbar(basicSnackbar, "No changes were made");
         } else {
-            var post = "";
-            for (var property in propertiesDictionary) {
-                if (propertiesDictionary.hasOwnProperty(property)) {
-                    var value = propertiesDictionary[property];
-                    post += property + "=" + encodeURIComponent(value) + "&";
-                }
-            }
-            post = post.substring(0, post.length - 1);
-            postRequest("/properties/update", post, function(xmlHttpRequest) {
+            patchRequest("/properties/update", JSON.stringify(propertiesDictionary), function(xmlHttpRequest) {
                 showSnackbar(basicSnackbar, xmlHttpRequest.responseText);
                 getInitialHash();
                 if (xmlHttpRequest.status !== 200) {

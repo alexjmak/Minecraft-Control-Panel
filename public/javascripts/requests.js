@@ -1,10 +1,9 @@
-var request = function(method, url, data, callback, authorization) {
-    var xmlHttpRequest = new XMLHttpRequest();
+let request = function(method, url, data, callback, authorization, contentType) {
+    let xmlHttpRequest = new XMLHttpRequest();
     xmlHttpRequest.open(method, url);
-	xmlHttpRequest.timeout = 10000
     if (authorization != null) xmlHttpRequest.setRequestHeader("Authorization", authorization);
     xmlHttpRequest.onreadystatechange = function () {
-        if (xmlHttpRequest.readyState == XMLHttpRequest.DONE) {
+        if (xmlHttpRequest.readyState === XMLHttpRequest.DONE) {
             callback(xmlHttpRequest);
         }
     };
@@ -12,25 +11,39 @@ var request = function(method, url, data, callback, authorization) {
     if (data == null) {
         xmlHttpRequest.send();
     } else {
-        xmlHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        if (contentType === undefined) contentType = "application/json";
+        if (contentType !== null) xmlHttpRequest.setRequestHeader("Content-Type", contentType);
+
         xmlHttpRequest.send(data);
     }
 };
 
-var getRequest = function(url, callback, authorization) {
+let getRequest = function(url, callback, authorization) {
     request("GET", url, null, callback, authorization);
 };
 
-var postRequest = function(url, data, callback, authorization) {
+let postRequest = function(url, data, callback, authorization) {
     request("POST", url, data, callback, authorization);
 };
 
+let putRequest = function(url, data, callback, authorization) {
+    request("PUT", url, data, callback, authorization);
+};
+
+let patchRequest = function(url, data, callback, authorization) {
+    request("PATCH", url, data, callback, authorization);
+};
+
+let deleteRequest = function(url, data, callback, authorization) {
+    request("DELETE", url, data, callback, authorization);
+};
+
 function getQueryVariable(variable) {
-    var query = window.location.search.substring(1);
-    var vars = query.split('&');
-    for (var i = 0; i < vars.length; i++) {
-        var pair = vars[i].split('=');
-        if (decodeURIComponent(pair[0]) == variable) {
+    let query = window.location.search.substring(1);
+    let vars = query.split('&');
+    for (let i = 0; i < vars.length; i++) {
+        let pair = vars[i].split('=');
+        if (decodeURIComponent(pair[0]) === variable) {
             return decodeURIComponent(pair[1]);
         }
     }

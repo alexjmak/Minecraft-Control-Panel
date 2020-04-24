@@ -53,20 +53,17 @@ router.put('/new', function(req, res) {
     let username = req.body.username;
     let password = req.body.password;
     let privilege = req.body.privilege;
-    let encrypted = req.body.encrypted;
 
     if (!checkRequiredFields(res, username, password)) return;
     if (username === "admin")  return res.status(401).send("Insufficient privilege level");
 
     checkPrivilege(req, res, undefined, function(result) {
         if (!result) return;
-        if (encrypted === undefined) encrypted = false;
         if (privilege === undefined) privilege = 0;
         else if (privilege > 100 || privilege.toString().toUpperCase() === "ADMIN") privilege = 100;
-        encrypted = encrypted === "true" || encrypted === true;
         checkChangePrivilege(req, res, privilege, function(result) {
             if(!result) return;
-            accountManager.newAccount(username, password, privilege, encrypted, function (result) {
+            accountManager.newAccount(username, password, privilege, function (result) {
                 if (result) {
                     res.send("Created account: " + username);
                 } else {
@@ -102,43 +99,6 @@ router.delete('/delete', function(req, res) {
 router.patch('/recover', function(req, res) {
     //todo
 });
-
-router.patch('/encrypted', function(req, res) {
-    let id = parseInt(req.body.id);
-    let encrypted = req.body.encrypted;
-    let password = req.body.password;
-
-    if (!checkRequiredFields(res, id, encrypted, password)) return;
-
-    checkPrivilege(req, res, id, function(result) {
-        if (!result) return;
-        authorization.checkPassword(id, password, function(result) {
-            if (result !== 1) {
-                if (encrypted) {
-                    accountManager.encryptAccount(id, password,function (result) {
-                        if (result) {
-                            res.send("Encrypted account");
-                        } else {
-                            res.status(404).send("Account not found");
-                        }
-                    });
-                } else {
-                    accountManager.decryptAccount(id, function (result) {
-                        if (result) {
-                            res.send("Decrypted account");
-                        } else {
-                            res.status(404).send("Account not found");
-                        }
-                    });
-                }
-            } else {
-                res.status(403).send("Incorrect Password");
-            }
-        })
-
-    });
-});
-
 
 router.patch('/enabled', function(req, res) {
     let id = parseInt(req.body.id);

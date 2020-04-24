@@ -8,9 +8,7 @@ const log = require("./log");
 let deleteFile = function(filePath, next) {
     let realFilePath = path.join(preferences.get("files"), filePath);
     let deleteFilePath = path.join(preferences.get("files"), ".recycle", filePath);
-    let deleteFilePathParent = deleteFilePath.split("/");
-    deleteFilePathParent.pop();
-    deleteFilePathParent = deleteFilePathParent.join("/");
+    let deleteFilePathParent = path.parse(deleteFilePath).dir;
 
     if (fs.existsSync(realFilePath)) {
         fs.mkdir(deleteFilePathParent, {recursive: true }, function(err) {

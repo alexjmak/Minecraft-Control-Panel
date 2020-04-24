@@ -32,25 +32,11 @@ body {
 }
 
 #console {
-
     height: 80%;
-    width: 99%;
     border-radius: 5px;
     overflow: scroll;
     padding: 5px;
     background-color: #151515;
-}
-
-@media (max-height: 764px) {
-    #console {
-        height: 75%;
-    }
-}
-
-@media (max-height: 600px) {
-    #console {
-        height: 70%;
-    }
 }
 
 #console_text {

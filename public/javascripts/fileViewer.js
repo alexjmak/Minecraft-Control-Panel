@@ -1,17 +1,19 @@
 let usedPasswordMemory;
 let authorized = false;
 
-var getFile = function(filePath, mode, authorization) {
+const supportedTypes = ["txt", "json", "conf", "log", "properties", "yml", "pdf", "apng", "bmp", "gif", "ico", "cur", "jpg", "jpeg", "pjpeg", "pjp", "png", "svg", "webp", "mp3", "m4a"];
+const plainText = ["txt", "json", "conf", "log", "properties", "yml"];
+let oldFileContents;
+
+let getFile = function(filePath, mode, authorization) {
     getRequest(filePath + "?" + mode, function(xmlHttpRequest) {
         if (xmlHttpRequest.status === 200) {
-            var content = $("#content");
+            let content = $("#content");
             content.show();
             if (mode === "authorize") {
                 authorized = true;
-                var supportedTypes = ["txt", "json", "log", "properties", "yml", "pdf", "apng", "bmp", "gif", "ico", "cur", "jpg", "jpeg", "pjpeg", "pjp", "png", ".svg", "webp"];
-                var extension = filePath.split(".").pop().toLowerCase();
+                let extension = filePath.split(".").pop().toLowerCase();
                 if (supportedTypes.includes(extension)) {
-
                     switch (extension) {
                         default:
                             getFile(filePath, "download");
@@ -20,8 +22,12 @@ var getFile = function(filePath, mode, authorization) {
                             content.append("<object data='/pdfjs/web/viewer.html?file=" + window.location.pathname + "?download'></object>")
                             break;
                         case "apng": case "bmp": case "gif": case "ico": case "cur": case "jpg":
-                        case "jpeg":case "pjpeg": case "pjp": case "png": case ".svg": case "webp":
+                        case "jpeg": case "pjpeg": case "pjp": case "png": case ".svg": case "webp":
                             content.append("<img class='mdc-elevation--z10' src='" + window.location.pathname + "?download'>");
+                            break;
+                        case "mp3": case "m4a":
+                            let audio = new Audio(window.location.pathname + "?download");
+                            audio.play();
                             break;
                     }
 
@@ -35,6 +41,7 @@ var getFile = function(filePath, mode, authorization) {
             if (mode === "download") {
                 content.append("<pre id='fileContents' class='selectable mdc-elevation--z10'></pre>");
                 $("#fileContents").text(xmlHttpRequest.responseText);
+                $("#edit").show();
                 hideAuthorization();
             }
 
@@ -51,15 +58,18 @@ var getFile = function(filePath, mode, authorization) {
 };
 
 var save = function(event) {
-    var filePath = event.data.filePath;
-    var newFileContents = $("#fileContents").text();
-    var data = "newFileContents=" + encodeURIComponent(newFileContents);
+    const filePath = event.data.filePath;
+    const newFileContents = $("#fileContents").text();
+    let blob = new Blob([newFileContents]);
+    let formData = new FormData();
+    formData.append('fileContents', filePath);
+    formData.append('data', blob);
 
-    postRequest(filePath, data, function(xmlHttpRequest) {
+    request("PUT", filePath, formData, function(xmlHttpRequest) {
         if (xmlHttpRequest.status === 200) {
             showSnackbar(basicSnackbar, xmlHttpRequest.responseText);
         }
-    });
+    }, undefined, null);
 };
 
 var revert = function(event) {
@@ -69,7 +79,7 @@ var revert = function(event) {
 var deleteFile = function(event) {
     let fileName = event.data.filePath.split("/").pop();
     showDialog(yesNoDialog, "Minecraft Control Panel", "Are you sure you want to delete " + fileName  + "?", {"yes": function() {
-            deleteRequest(event.data.filePath, function(xmlHttpRequest) {
+            deleteRequest(event.data.filePath, null, function(xmlHttpRequest) {
                 if (xmlHttpRequest.status === 200)  {
                     showSnackbar(basicSnackbar, "Deleted " + fileName);
                     window.location.href = '.';
@@ -78,6 +88,28 @@ var deleteFile = function(event) {
                 }
             });
         }});
+};
+
+var edit = function(event) {
+    const filePath = event.data.filePath;
+    const extension = filePath.split(".").pop().toLowerCase();
+    if (!authorized || !plainText.includes(extension)) return;
+    let fileContents = $("#fileContents").text();
+
+    let mode = $("#edit").find("span").text();
+    if (mode === "Save") {
+        if (fileContents !== oldFileContents) save(event);
+        $("#fileContents").prop("contenteditable", false);
+        $("#edit").find("i").text("edit");
+        $("#edit").find("span").text("Edit");
+    } else {
+        oldFileContents = fileContents;
+        $("#fileContents").prop("contenteditable", true);
+        $("#edit").find("i").text("save");
+        $("#edit").find("span").text("Save");
+
+    }
+
 };
 
 var download = function(event) {
@@ -116,6 +148,9 @@ var hideAuthorization = function()  {
 };
 
 $(document).ready(function() {
+    checkMobileResize();
+    $(window).resize(checkMobileResize);
+
     let pathSplit = filePath.split("/");
     if (pathSplit.length <= 1) {
         $("#back").hide();
@@ -127,25 +162,30 @@ $(document).ready(function() {
 
     getFile(filePath, "authorize");
 
-    $("#back").click(function() {
-        window.open(location.pathname + "/..", "_self");
-    });
+    $("#edit").click({filePath: filePath}, edit);
 
     $("#download").click({filePath: filePath}, download);
 
     $("#delete").click({filePath: filePath}, deleteFile);
 
-    $(document).keypress(function(e) {
-        var key = e.which;
-        if (key === 13) {
-            authorize({data: {filePath: filePath}})
-        }
-    });
-
     $("#submit").click({filePath: filePath}, authorize);
-
-    $("#logout").click(function() {
-        $.removeCookie("fileToken", { path: location.pathname.split("/").slice(0, 4).join("/") });
-        window.location.href = "/logout";
-    });
 });
+
+$(document).keydown(function(event) {
+    var key = event.which;
+    if (key === 13) {
+        authorize({data: {filePath: filePath}})
+    }
+
+    if ((event.ctrlKey || event.metaKey) && key === 83) {
+        event.preventDefault();
+        let mode = $("#edit").find("span").text();
+        if (mode === "Save") $("#edit").trigger("click");
+    }
+});
+
+$(window).on("beforeunload", function() {
+    let mode = $("#edit").find("span").text();
+    if (mode === "Save") return "Changes you made may not be saved.";
+});
+

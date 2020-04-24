@@ -220,15 +220,6 @@ function updatePrivilege(id, newPrivilege, next) {
     });
 }
 
-function log(req, text) {
-    if (typeof req === "string") {
-        text = req;
-        console.log("[Account Manager] [" + strftime("%H:%M:%S") + "]: " + text);
-    } else {
-        console.log("[Account Manager] [" + strftime("%H:%M:%S") + "] [" + (req.ip) + "]: " + req.method + " " + text);
-    }
-}
-
 module.exports = {
     accountExists: accountExists,
     getAccountsSummary: getAccountsSummary,

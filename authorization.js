@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const child_process = require("child_process");
 const strftime = require('strftime');
 const accountManager = require("./accountManager");
+const log = require("./log");
 
 const secretKey = fs.readFileSync('./keys/jwt/secret.key', 'utf8');
 let serverID;
@@ -28,7 +29,7 @@ function verifyToken(rawToken){
         let token = jwt.verify(rawToken, secretKey);
         return token;
     } catch (err) {
-        log(err);
+        log.write(err);
     }
     return false;
 }
@@ -128,15 +129,6 @@ function generateSalt() {
 
 function getHash(password, salt) {
     return crypto.createHmac('sha512', salt).update(password).digest('hex');
-}
-
-function log(req, text) {
-    if (typeof req === "string") {
-        text = req;
-        console.log("[Authorization] [" + strftime("%H:%M:%S") + "]: " + text);
-    } else {
-        console.log("[Authorization] [" + strftime("%H:%M:%S") + "] [" + (req.ip) + "]: " + req.method + " " + text);
-    }
 }
 
 module.exports = {

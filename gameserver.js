@@ -1,35 +1,36 @@
 const child_process = require('child_process');
 const pidusage = require('pidusage');
 const strftime = require('strftime');
+const log = require("./log")
 
-let gameServer;
+let gameserver;
 let allocatedMemory = 2048; //MB
 let running = false;
 let onCloseFunction;
 
 function start(cwd) {
-    log("[" + strftime("%H:%M:%S") + "]: Starting server...");
+    log.write("[" + strftime("%H:%M:%S") + "]: Starting server...");
 
-    gameServer = child_process.spawn('java',  ["-Xmx" +  allocatedMemory + "M",  "-Xms" + allocatedMemory + "M", "-jar", "server.jar", "nogui"], {cwd: cwd});
+    gameserver = child_process.spawn('java',  ["-Xmx" +  allocatedMemory + "M",  "-Xms" + allocatedMemory + "M", "-jar", "server.jar", "nogui"], {cwd: cwd});
 
     running = true;
 
-    gameServer.on('error', function(err) {
-        log("[" + strftime("%H:%M:%S") + "]: " + err);
+    gameserver.on('error', function(err) {
+        log.write("[" + strftime("%H:%M:%S") + "]: " + err);
     });
 
-    gameServer.on('close', function (code) {
+    gameserver.on('close', function (code) {
         running = false;
-        log("[" + strftime("%H:%M:%S") + "]: Server stopped");
+        log.write("[" + strftime("%H:%M:%S") + "]: Server stopped");
         if (onCloseFunction !== undefined) onCloseFunction(cwd);
         setOnCloseFunction(undefined);
     });
 
-    gameServer.stdout.on("data", function(data) {
-        log(data.toString().trimEnd());
+    gameserver.stdout.on("data", function(data) {
+        log.write(data.toString().trimEnd());
     });
 
-    return gameServer;
+    return gameserver;
 }
 
 function isRunning() {
@@ -45,7 +46,7 @@ function getUsage(next) {
         if (next !== undefined) next();
         return;
     }
-    pidusage(gameServer.pid, function(err, usage) {
+    pidusage(gameserver.pid, function(err, usage) {
         if (err === null) {
             usage.allocatedMemory = allocatedMemory * 1000000;
             if (next !== undefined) next(usage);
@@ -55,11 +56,7 @@ function getUsage(next) {
 }
 
 function command(command) {
-    if (gameServer !== undefined) gameServer.stdin.write(command + "\n");
-}
-
-function log(text) {
-    console.log("[Minecraft] " + text);
+    if (gameserver !== undefined) gameserver.stdin.write(command + "\n");
 }
 
 module.exports = {

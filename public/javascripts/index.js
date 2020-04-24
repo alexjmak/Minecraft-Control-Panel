@@ -1,20 +1,20 @@
 $(document).ready(function() {
-    var x = document.getElementsByClassName('mdc-button');
-    var i;
+    let x = document.getElementsByClassName('mdc-button');
+    let i;
     for (i = 0; i < x.length; i++) {
         mdc.ripple.MDCRipple.attachTo(x[i]);
     }
 
-	var title = $("#title");
-    var command = $("#command");
-    var console = $("#console");
-    var log = $("#console_text");
-    var oldLogText = true;
+	let title = $("#title");
+    let command = $("#command");
+    let console = $("#console");
+    let log = $("#console_text");
+    let oldLogText = true;
     let oldSize = 0;
-    var scrollDifference = console[0].scrollHeight - console.scrollTop();
-    var noConnDialog;
-    var restartClicked = false;
-    var firstRun = true;
+    let scrollDifference = console[0].scrollHeight - console.scrollTop();
+    let noConnDialog;
+    let restartClicked = false;
+    let firstRun = true;
 
 
     const memoryBar = mdc.linearProgress.MDCLinearProgress.attachTo(document.getElementById('memoryBar'));
@@ -37,7 +37,7 @@ $(document).ready(function() {
     $(window).resize(function() {
         updateWindow();
     });
-    var updateGameServerStatus = function() {
+    let updateGameServerStatus = function() {
         if (firstRun) {
             firstRun = false;
             $("#start").attr("disabled", false);
@@ -78,7 +78,7 @@ $(document).ready(function() {
     };
 
 
-    var getGameServerStatus = function(automatic) {
+    let getGameServerStatus = function(automatic) {
         getRequest("/status", function(xmlHttpRequest) {
             let timeout = 10000;
             if (xmlHttpRequest.status === 200) {
@@ -102,16 +102,16 @@ $(document).ready(function() {
 
     };
 
-	var getProperties = function() {
+	let getProperties = function() {
 	    getRequest("/files/server.properties?download", function(xmlHttpRequest) {
             if (xmlHttpRequest.status === 200) {
-                var propertiesDictionary = {};
-                var propertiesList = xmlHttpRequest.responseText.trim().split("\n");
-                for (var line in propertiesList) {
-                    var property = propertiesList[line];
+                let propertiesDictionary = {};
+                let propertiesList = xmlHttpRequest.responseText.trim().split("\n");
+                for (let line in propertiesList) {
+                    let property = propertiesList[line];
 
                     if (!property.startsWith("#")) {
-                        var lineSplit = property.split("=");
+                        let lineSplit = property.split("=");
                         propertiesDictionary[lineSplit[0]] = lineSplit[1];
                     }
                 }
@@ -120,7 +120,7 @@ $(document).ready(function() {
         });
     };
 	
-    var getLogHash = function(automatic) {
+    let getLogHash = function(automatic) {
 
         getRequest("/log/size", function(xmlHttpRequest) {
             if (xmlHttpRequest.status == 200) {
@@ -178,7 +178,7 @@ $(document).ready(function() {
         });
     };
 
-    var postCommand = function(command) {
+    let postCommand = function(command) {
         if (command === "start") {
             $("#start").attr("disabled", true);
         } else if (command === "stop" || command ===  "restart") {
@@ -186,12 +186,12 @@ $(document).ready(function() {
             $("#stop").attr("disabled", true);
             $("#restart").attr("disabled", true);
         }
-        var data = "command=" + encodeURIComponent(command);
-        postRequest("/command", data, function(xmlHttpRequest) {
-            if (xmlHttpRequest.status == 200) {
+        let data = {"command": command};
+        postRequest("/command", JSON.stringify(data), function(xmlHttpRequest) {
+            if (xmlHttpRequest.status === 200) {
                 getLogHash(false);
             }
-            if (xmlHttpRequest.status == 401) {
+            if (xmlHttpRequest.status === 401) {
                 restartClicked = false;
                 $("#start").attr("disabled", false);
                 $("#stop").attr("disabled", false);
@@ -202,9 +202,9 @@ $(document).ready(function() {
         });
     };
 
-    var submit = function() {
+    let submit = function() {
         command.focus();
-        if (command.val().trim() != "") {
+        if (command.val().trim() !== "") {
             postCommand(command.val());
             command.val("");
         }
@@ -213,7 +213,7 @@ $(document).ready(function() {
     command.focus();
 
     $(document).keypress(function(e) {
-        var key = e.which;
+        let key = e.which;
         if (key === 13) {
             submit();
         }

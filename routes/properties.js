@@ -2,6 +2,7 @@ const express = require('express');
 const os = require('os');
 const fs = require('fs');
 const crypto = require('crypto');
+const path = require("path");
 const accountManager = require('../accountManager');
 const authorization = require('../authorization');
 const preferences = require('../preferences');

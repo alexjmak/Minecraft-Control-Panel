@@ -152,7 +152,7 @@ $(document).ready(function() {
     checkMobileResize();
     $(window).resize(checkMobileResize);
 
-    let pathSplit = filePath.split("/");
+    let pathSplit = location.pathname.split("/");
     if (pathSplit.length <= 1) {
         $("#back").hide();
     }

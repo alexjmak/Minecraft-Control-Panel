@@ -69,7 +69,7 @@ function getAccountRowHTML(id, username, privilege, enabled) {
 function getNewAccountRowHTML() {
     return `<tr name=-1>` +
         `<td><input class='username new-account first-column' name=-1 type='text' autocomplete='off' autocapitalize='none' placeholder='New account username'></td>` +
-        `<td><input class='password new-account' name=-1 type='password' placeholder='New account username'></td>` +
+        `<td><input class='password new-account' name=-1 type='password' placeholder='New account password'></td>` +
         `<td><input class='privilege new-account' name=-1 type='text' maxlength='5' autocomplete='off' autocapitalize='none' placeholder='New account privilege'></td>` +
         `<td><button class='add new-account mdc-icon-button material-icons' name=-1>add</button></td>` +
         `<td></td>` +

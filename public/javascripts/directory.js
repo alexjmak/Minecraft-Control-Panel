@@ -1,6 +1,10 @@
 $(document).ready(function() {
     let files = $("#files");
 
+    folderContents = folderContents.filter(function(file) {
+        return !file.name.startsWith(".");
+    });
+
     let filesPath = location.pathname.substring(1);
     filesPath = filesPath.split("/");
 
@@ -59,15 +63,6 @@ $(document).ready(function() {
     let iconButtons = document.getElementsByClassName('mdc-icon-button');
     for (let i = 0; i < iconButtons.length; i++) {
         new mdc.ripple.MDCRipple(iconButtons[i]).unbounded = true;
-    }
-
-    for (let fileIndex in folderContents) {
-        if (folderContents.hasOwnProperty(fileIndex)) {
-            let file = folderContents[fileIndex];
-            if (file.name === ".recycle") {
-                folderContents.splice(fileIndex, 1);
-            }
-        }
     }
 
     for (let fileIndex in folderContents) {
@@ -165,8 +160,8 @@ $(document).ready(function() {
 
         let fileName = $(selectedItem).attr("name");
         let fileId = $(selectedItem).attr("id");
-        showDialog(yesNoDialog, "Minecraft Control Panel", "Are you sure you want to delete " + fileName  + "?", {"yes": function() {
-                deleteRequest([location.pathname, fileName].join("/"), function(xmlHttpRequest) {
+        showDialog(yesNoDialog, "MakCloud", "Are you sure you want to delete " + fileName  + "?", {"yes": function() {
+                deleteRequest([location.pathname, fileName].join("/"), null, function(xmlHttpRequest) {
                     if (xmlHttpRequest.status === 200)  {
                         folderContents.splice(fileId, 1);
                         reload();
@@ -178,17 +173,31 @@ $(document).ready(function() {
             }});
     });
 
-    $("#upload").click(function() {
-        $("#uploadButton").trigger("click");
+
+    $("#share").click(function () {
+        share({"data": {"filePath": [location.pathname, $(selectedItem).attr("name")].join("/")}});
     });
 
-    $("#back").click(function() {
-        window.open(location.pathname + "/..", "_self");
+    $("html").on("dragover", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
     });
 
-    $("#logout").click(function() {
-        $.removeCookie("fileToken", { path: location.pathname.split("/").slice(0, 4).join("/") });
-        window.location.href = "/logout";
+    $("html").on("drop", function(e) { e.preventDefault(); e.stopPropagation(); });
+
+    // Drag enter
+    $("#files").on('dragenter', function (e) {
+        console.log("dragenter");
+    });
+
+    // Drag over
+    $("#files").on('dragover', function (e) {
+        console.log("dragover");
+    });
+
+    // Drop
+    $("#files").on('drop', function (e) {
+        console.log("drop");
     });
 
     function fileClick(file) {

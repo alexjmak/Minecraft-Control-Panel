@@ -13,18 +13,6 @@ router.get('/', function(req, res) {
     });
 });
 
-router.get('/recover', function(req, res) {
-    accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function(username) {
-        res.render('accounts', {username: username, hostname: os.hostname(), recover: true});
-    });
-});
-
-router.get('/recover/list', function(req, res) {
-    accountManager.getDeletedAccountsSummary(authorization.getLoginTokenAudience(req), function (result) {
-        res.json(result);
-    });
-});
-
 router.get('/list', function(req, res) {
     accountManager.getAccountsSummary(authorization.getLoginTokenAudience(req), function (result) {
         res.json(result);

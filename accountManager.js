@@ -50,25 +50,6 @@ function getAccountsSummary(id, next) {
     });
 }
 
-function getDeletedAccountsSummary(id, next) {
-    getInformation("privilege", "id", id, function(privilege) {
-        getInformation("username", "id", id, function(username) {
-            database.all("SELECT id, username, privilege, dateDeleted FROM deleted_accounts WHERE ? OR id = ? OR privilege < ? ORDER BY username COLLATE NOCASE", [username === "admin", id, privilege], function (results) {
-                let resultsById = {};
-                for (let result in results) {
-                    if (results.hasOwnProperty(result)) {
-                        result = results[result];
-                        let id = result.id;
-                        delete result[id];
-                        resultsById[id] = result;
-                    }
-                }
-                if (next !== undefined) next(results);
-            });
-        });
-    });
-}
-
 function searchAccounts(query, next) {
     database.all("SELECT id, username FROM accounts WHERE username LIKE ?", "%" + query + "%", function (results) {
         let resultsById = {};
@@ -92,7 +73,7 @@ function getInformation(select, whereKey, whereValue, next) {
 
 
 function nextID(next) {
-    database.get("SELECT max(id) as id FROM (SELECT id FROM accounts UNION SELECT id FROM deleted_accounts);", null, function(result) {
+    database.get("SELECT max(id) as id FROM accounts;", null, function(result) {
         if (result.id !== null) {
             if (next !== undefined) next(result.id + 1);
         } else {
@@ -223,7 +204,6 @@ function updatePrivilege(id, newPrivilege, next) {
 module.exports = {
     accountExists: accountExists,
     getAccountsSummary: getAccountsSummary,
-    getDeletedAccountsSummary: getDeletedAccountsSummary,
     searchAccounts: searchAccounts,
     getInformation: getInformation,
     newAccount: newAccount,

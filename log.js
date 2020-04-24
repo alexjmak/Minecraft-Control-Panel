@@ -51,10 +51,17 @@ function writeServer(req, ...text) {
     log.push(logString);
 }
 
+function writeRaw(...text) {
+    let logString = text.join(" ");
+    console.log(logString);
+    log.push(logString);
+}
+
 function get() {
     return log.join("\n");
 }
 
 module.exports = {get: get,
                   write: write,
-                  writeServer: writeServer};
+                  writeServer: writeServer,
+                  writeRaw: writeRaw};

@@ -58,8 +58,7 @@ router.get('/*', function(req, res, next) {
                         fs.readFile(realFilePath, function (err, contents) {
                             res.render('fileViewer', {
                                 username: username,
-                                hostname: os.hostname(),
-                                file: {path: urlFilePath}
+                                hostname: os.hostname()
                             });
                         });
                     });

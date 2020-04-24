@@ -60,6 +60,7 @@ body {
 #command {
     margin-top: 5px;
 }
+
 #command::placeholder {
     color: lightgray;
 }

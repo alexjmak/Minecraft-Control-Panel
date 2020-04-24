@@ -177,7 +177,7 @@ function updateButton(event) {
     if (button.hasClass("delete")) {
         let prompt = "Are you sure you want to delete " + accountFieldValues[id].username + "?";
         if (id === currentID) prompt = "Are you sure you want to delete your account?";
-        showDialog(yesNoDialog, "MakCloud", prompt, {"yes": function() {
+        showDialog(yesNoDialog, "Minecraft Control Panel", prompt, {"yes": function() {
                 deleteRequest(url + "delete", JSON.stringify(data), updateCallback);
                 if (id === currentID) {
                     window.location = "/logout";

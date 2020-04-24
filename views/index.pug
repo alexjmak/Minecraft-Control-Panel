@@ -4,6 +4,30 @@ block header
     link(rel='stylesheet', type='text/css', href='/stylesheets/index.css')
     script(type='text/javascript', src= "/javascripts/index.js")
 
+block drawer
+    aside.mdc-drawer.mdc-top-app-bar--fixed-adjust.mdc-drawer--modal
+        .mdc-drawer__header
+            h3.mdc-drawer__title Minecraft Control Panel
+            h6.mdc-drawer__subtitle= hostname
+        .mdc-drawer__content
+            nav.mdc-list
+                a.mdc-list-item.mdc-list-item--activated(href='/')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') code
+                    span.mdc-list-item__text Console
+                a.mdc-list-item(href='/properties')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') list
+                    span.mdc-list-item__text Server Properties
+                a.mdc-list-item(href='/accounts')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') account_circle
+                    span.mdc-list-item__text Account Manager
+                a.mdc-list-item(href='/files')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') folder
+                    span.mdc-list-item__text File Manager
+                .mdc-list-divider
+                a.mdc-list-item(href='/logout')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') launch
+                    span.mdc-list-item__text Logout
+
 block content
     .box.mdc-elevation--z8
         h2#title.mdc-typography.mdc-typography--headline4= " "
@@ -12,7 +36,7 @@ block content
         h3#serverInfo.mdc-typography.mdc-typography--subtitle2= address + ":" + port + " - " + hostname
         h3#playerCount.mdc-typography.mdc-typography--subtitle2
         #console.mdc-elevation--z4
-            p#console_text
+            pre#console_text
             input#command(type='text', placeholder='Command' autocomplete='off' autocapitalize="none")
         br
         div
@@ -31,4 +55,3 @@ block content
 
                 h3#memory.mdc-typography--subtitle2
                 h3#memoryTitle.mdc-typography--subtitle2 Memory:
-

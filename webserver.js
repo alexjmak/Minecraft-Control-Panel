@@ -6,7 +6,7 @@ const path = require("path");
 const strftime = require('strftime');
 const cookieParser = require('cookie-parser');
 const helmet = require("helmet");
-
+const log = require("./log")
 const authorization = require('./authorization');
 
 const app = express();
@@ -19,7 +19,7 @@ const logoutRouter = require('./routes/logout');
 const updateRouter = require('./routes/update');
 const propertiesRouter = require('./routes/properties');
 
-log("Starting server...");
+log.write("Starting server...");
 
 app.use(helmet());
 app.use(cookieParser());
@@ -37,12 +37,11 @@ app.use(function(req, res, next) {
 
 app.use(express.static(path.join(__dirname, "public")));
 
-const noLog = ["/status", "/log", "/log/hash", "/properties/hash", "/accounts/list/hash"];
+const noLog = ["/command", "/status", "/log", "/log/size", "/properties/hash", "/accounts/list/hash"];
 app.use(function(req, res, next) {
-    if (noLog.indexOf(req.path) === -1) log(req, req.url);
+    if (noLog.indexOf(req.path) === -1) log.writeServer(req, req.method, req.url);
     next();
 });
-
 
 app.use('/logout', logoutRouter);
 app.use('/login', loginRouter);
@@ -62,8 +61,9 @@ app.use(function(req, res, next) {
 });
 
 app.use(function(err, req, res, next) {
-    log(req, req.url + " (" + (err.status || 500) + " " + err.message + ")");
+    log.writeServer(req, req.method, req.url + " (" + (err.status || 500) + " " + err.message + ")");
     res.status(err.status || 500);
+    if (res.headersSent) return;
     res.render('error', {message: err.message, status: err.status});
 });
 
@@ -90,15 +90,6 @@ function httpRedirectServer() {
     });
     httpServer.listen(80);
     return httpServer;
-}
-
-function log(req, text) {
-    if (typeof req === "string") {
-        text = req;
-        console.log("[Webserver] [" + strftime("%H:%M:%S") + "]: " + text);
-    } else {
-        console.log("[Webserver] [" + strftime("%H:%M:%S") + "] [" + (req.ip) + "]: " + req.method + " " + text);
-    }
 }
 
 module.exports = {

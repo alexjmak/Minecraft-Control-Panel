@@ -45,7 +45,7 @@ router.get('/*', function(req, res, next) {
                 } else {
                     accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function (username) {
                         fs.readFile(realFilePath, function (err, contents) {
-                            res.render('fileEditor', {
+                            res.render('fileViewer', {
                                 username: username,
                                 hostname: os.hostname(),
                                 file: {path: urlFilePath}
@@ -70,12 +70,12 @@ router.delete("/*", function(req, res, next) {
     if (fs.existsSync(realFilePath)) {
         fs.mkdir(deleteFilePathParent, {recursive: true }, function(err) {
             if (err) {
-                console.log(err);
+                log.write(err);
                 res.sendStatus(404)
             } else {
                 fs.rename(realFilePath, deleteFilePath, function (err) {
                     if (err) {
-                        console.log(err);
+                        log.write(err);
                         res.sendStatus(404)
                     } else {
                         res.sendStatus(200)

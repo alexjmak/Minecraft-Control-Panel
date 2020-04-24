@@ -7,6 +7,30 @@ block header
         let directoryPath = "#{directory.path}";
     script(type='text/javascript', src= "/javascripts/directory.js")
 
+block drawer
+    aside.mdc-drawer.mdc-top-app-bar--fixed-adjust.mdc-drawer--modal
+        .mdc-drawer__header
+            h3.mdc-drawer__title Minecraft Control Panel
+            h6.mdc-drawer__subtitle= hostname
+        .mdc-drawer__content
+            nav.mdc-list
+                a.mdc-list-item.mdc-list-item--activated(href='/')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') code
+                    span.mdc-list-item__text Console
+                a.mdc-list-item(href='/properties')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') list
+                    span.mdc-list-item__text Server Properties
+                a.mdc-list-item(href='/accounts')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') account_circle
+                    span.mdc-list-item__text Account Manager
+                a.mdc-list-item(href='/files')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') folder
+                    span.mdc-list-item__text File Manager
+                .mdc-list-divider
+                a.mdc-list-item(href='/logout')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') launch
+                    span.mdc-list-item__text Logout
+
 block content
     table#navigation-bar-table
         tr#navigation-bar

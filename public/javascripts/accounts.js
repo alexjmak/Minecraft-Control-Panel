@@ -1,5 +1,4 @@
 $(document).ready(function() {
-    var main = $("#main_accounts");
     var accounts = $("#accounts");
     var currentID = parseJwt($.cookie("loginToken")).aud;
     var currentPrivilege;

@@ -7,11 +7,11 @@ $(document).ready(function() {
 
 	var title = $("#title");
     var command = $("#command");
-    var consoleDiv = $("#console");
+    var console = $("#console");
     var log = $("#console_text");
     var oldLogText = true;
-    var oldMD5 = null;
-    var scrollDifference = consoleDiv[0].scrollHeight - consoleDiv.scrollTop();
+    let oldSize = 0;
+    var scrollDifference = console[0].scrollHeight - console.scrollTop();
     var noConnDialog;
     var restartClicked = false;
     var firstRun = true;
@@ -122,16 +122,17 @@ $(document).ready(function() {
 	
     var getLogHash = function(automatic) {
 
-        getRequest("/log/hash", function(xmlHttpRequest) {
+        getRequest("/log/size", function(xmlHttpRequest) {
             if (xmlHttpRequest.status == 200) {
                 if (noConnDialog != undefined && noConnDialog.isOpen) noConnDialog.close();
-                var md5 = xmlHttpRequest.responseText;
+                let size = parseInt(xmlHttpRequest.responseText);
                 if (xmlHttpRequest.responseURL.search("login") !== -1) {
                     automatic = false;
                     showDialog(okDialog, "Minecraft Control Panel", "Your session has expired", {"close": function() {window.location = "/logout"}});
-                } else if (oldMD5 != md5) {
-                    oldMD5 = md5;
-                    getLog();
+                } else if (oldSize !== size) {
+                    if (size > oldSize) getLog(oldSize);
+                    else getLog();
+                    oldSize = size;
                 }
             }
             if (xmlHttpRequest.status == 0 && (noConnDialog === undefined || !noConnDialog.isOpen)) {
@@ -154,21 +155,23 @@ $(document).ready(function() {
         });
     };
 
-    var getLog = function() {
-        getRequest("/log", function(xmlHttpRequest) {
+    let getLog = function(start) {
+        if (!start) {
+            start = 0;
+            log.text("");
+        }
 
-            if (xmlHttpRequest.status == 200) {
-                var logText = xmlHttpRequest.responseText;
-                logText = logText.replace(/\n/g, "<br>");
-                log.text("");
+        getRequest("/log?start=" + start, function(xmlHttpRequest) {
+            if (xmlHttpRequest.status === 200) {
+                let logText = xmlHttpRequest.responseText;
                 log.append(logText);
                 if (oldLogText !== logText) {
                     oldLogText = logText;
-                    if ((consoleDiv[0].scrollHeight - consoleDiv.scrollTop()) < scrollDifference + 130) {
-                        consoleDiv.scrollTop(consoleDiv[0].scrollHeight);
+                    if ((console[0].scrollHeight - console.scrollTop()) < scrollDifference + 130) {
+                        console.scrollTop(console[0].scrollHeight);
                     } else {
-                        consoleDiv.scrollTop(consoleDiv.animate({
-                            scrollTop: consoleDiv[0].scrollHeight}, 'slow'));
+                        console.scrollTop(console.animate({
+                            scrollTop: console[0].scrollHeight}, 'slow'));
                     }
                 }
             }
@@ -211,7 +214,7 @@ $(document).ready(function() {
 
     $(document).keypress(function(e) {
         var key = e.which;
-        if (key == 13) {
+        if (key === 13) {
             submit();
         }
     });

@@ -5,7 +5,9 @@ function command(command, req) {
     if (typeof command !== "object") {
         if (req) log.writeServer(req, command)
         else log.write(command);
-    } else command = command.toString();
+    } else {
+        command = command.toString();
+    }
     command = command.trim();
     if (command.startsWith("/")) command = command.substring(1);
     if (gameServer.isRunning()) {

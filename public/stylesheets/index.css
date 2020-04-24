@@ -57,6 +57,9 @@ body {
     width: 100%;
 }
 
+#command {
+    margin-top: 5px;
+}
 #command::placeholder {
     color: lightgray;
 }

@@ -40,7 +40,7 @@ router.patch('/update', function(req, res) {
                 res.send("Updated " + keys.length + " properties");
             });
         } else {
-            res.status(401).send("Insufficient privilege level");
+            res.status(403).send("Insufficient privilege level");
         }
     });
 });

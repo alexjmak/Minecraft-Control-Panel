@@ -84,8 +84,10 @@ var deleteFile = function(event) {
                 if (xmlHttpRequest.status === 200)  {
                     showSnackbar(basicSnackbar, "Deleted " + fileName);
                     window.location.href = '.';
+                } else if (xmlHttpRequest.status === 403) {
+                    showSnackbar(basicSnackbar, xmlHttpRequest.responseText)
                 } else {
-                    showSnackbar(basicSnackbar, "Error deleting " + fileName);
+                    showSnackbar(basicSnackbar, "Error deleting " + fileName)
                 }
             });
         }});

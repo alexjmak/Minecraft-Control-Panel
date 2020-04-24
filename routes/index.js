@@ -73,7 +73,7 @@ router.post('/command', function(req, res) {
                 commandManager(req.body.command, req);
                 res.status(200).end();
             } else {
-                res.status(401).send("Insufficient privilege level");
+                res.status(403).send("Insufficient privilege level");
             }
         });
 

@@ -191,7 +191,7 @@ $(document).ready(function() {
             if (xmlHttpRequest.status === 200) {
                 getLogHash(false);
             }
-            if (xmlHttpRequest.status === 401) {
+            if (xmlHttpRequest.status === 403) {
                 restartClicked = false;
                 $("#start").attr("disabled", false);
                 $("#stop").attr("disabled", false);

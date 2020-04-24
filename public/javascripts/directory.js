@@ -157,7 +157,6 @@ $(document).ready(function() {
     });
 
     $("#delete").click(function () {
-
         let fileName = $(selectedItem).attr("name");
         let fileId = $(selectedItem).attr("id");
         showDialog(yesNoDialog, "MakCloud", "Are you sure you want to delete " + fileName  + "?", {"yes": function() {
@@ -166,16 +165,13 @@ $(document).ready(function() {
                         folderContents.splice(fileId, 1);
                         reload();
                         showSnackbar(basicSnackbar, "Deleted " + fileName)
+                    } else if (xmlHttpRequest.status === 403) {
+                        showSnackbar(basicSnackbar, xmlHttpRequest.responseText)
                     } else {
                         showSnackbar(basicSnackbar, "Error deleting " + fileName)
                     }
                 });
             }});
-    });
-
-
-    $("#share").click(function () {
-        share({"data": {"filePath": [location.pathname, $(selectedItem).attr("name")].join("/")}});
     });
 
     $("html").on("dragover", function(e) {

@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require("fs");
+const createError = require('http-errors');
 const os = require('os');
 const path = require("path");
 const readify = require('readify');
@@ -15,7 +16,6 @@ const router = express.Router();
 router.get('/*', function(req, res, next) {
     let filePath = decodeURIComponent(url.parse(req.url).pathname).substring(1);
     let realFilePath = path.join(preferences.get("files"), filePath);
-    let urlFilePath = path.join(req.baseUrl, filePath);
 
     const parameter = Object.keys(req.query)[0];
 
@@ -65,6 +65,14 @@ router.get('/*', function(req, res, next) {
                     break;
             }
         }
+    });
+});
+
+router.use(function(req, res, next) {
+    let id = authorization.getLoginTokenAudience(req);
+    accountManager.getInformation("privilege", "id", id, function(privilege) {
+        if (privilege === 100) next();
+        else res.status(403).send("Insufficient privilege level");
     });
 });
 

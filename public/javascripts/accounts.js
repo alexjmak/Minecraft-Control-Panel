@@ -46,7 +46,9 @@ function displayAccountInfo(accountInfo) {
     $(`.account.delete[name=${adminID}]`).prop("disabled", true);
     $(`.account.privilege[name=${currentID}]`).prop("disabled", true);
     $(`.account.enabled[name=${currentID}]`).prop("disabled", true);
-    table.append(getNewAccountRowHTML());
+    if (currentInfo.privilege > 0 || currentInfo.username.toLowerCase() === "admin") {
+        table.append(getNewAccountRowHTML());
+    }
     accountFieldValues = accountInfo;
     $(".account.username, .account.privilege").blur(updateField);
     $(".account.password").blur(updateField)
@@ -123,7 +125,7 @@ function updateField(event, data) {
     if (field.hasClass("password")) fieldName = "password";
     if (field.hasClass("privilege")) fieldName = "privilege";
     value = updateValidation(id, field, fieldName, value);
-    if (value) {
+    if (value !== false) {
         data[fieldName] = value;
         patchRequest(url + fieldName, JSON.stringify(data), updateCallback)
     } else {

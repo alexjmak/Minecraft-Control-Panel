@@ -4,8 +4,11 @@ const strftime = require('strftime');
 let log = [];
 
 function getCaller() {
+    let origPrepareStackTrace = Error.prepareStackTrace
     let err = new Error();
     Error.prepareStackTrace = function (err, stack) { return stack; };
+    let stack = err.stack;
+    Error.prepareStackTrace = origPrepareStackTrace;
     for (let i = 0; i < err.stack.length; i++) {
         let fileName = err.stack[i].getFileName();
         if (fileName !== __filename) {
@@ -17,7 +20,7 @@ function getCaller() {
 
 function formatFilename(fileName) {
     fileName = path.basename(fileName);
-    fileName = fileName.substring(0, fileName.indexOf("."));
+    if (fileName.indexOf(".") !== -1) fileName = fileName.substring(0, fileName.indexOf("."));
     fileName = fileName.split("");
     fileName[0] = fileName[0].toUpperCase();
     for (let i = 1; i < fileName.length; i++) {
@@ -53,5 +56,5 @@ function get() {
 }
 
 module.exports = {get: get,
-    write: write,
-    writeServer: writeServer};
+                  write: write,
+                  writeServer: writeServer};

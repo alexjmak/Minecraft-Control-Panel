@@ -34,7 +34,7 @@ function accountExists(usernameOrID, enabledCheck, next) {
 function getAccountsSummary(id, next) {
     getInformation("privilege", "id", id, function(privilege) {
         getInformation("username", "id", id, function(username) {
-            database.all("SELECT id, username, privilege, encryptKey NOT NULL AS encrypted, enabled FROM accounts WHERE ? OR id = ? OR privilege < ? ORDER BY username COLLATE NOCASE", [username === "admin", id, privilege], function (results) {
+            database.all("SELECT id, username, privilege, enabled FROM accounts WHERE ? OR id = ? OR privilege < ? ORDER BY username COLLATE NOCASE", [username === "admin", id, privilege], function (results) {
                 let resultsById = {};
                 for (let result in results) {
                     if (results.hasOwnProperty(result)) {

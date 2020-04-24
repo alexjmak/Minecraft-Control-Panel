@@ -21,9 +21,11 @@ router.get('/', function(req, res) {
 });
 
 router.get('/texture-pack.zip', function(req, res, next) {
-    let file = path.resolve(preferences.get("texture-pack"));
+    let filePath = preferences.get("texture-pack");
+    if (!filePath) return
+    filePath = path.resolve(filePath);
     try {
-        let stream = fs.createReadStream(file);
+        let stream = fs.createReadStream(filePath);
         res.set('content-disposition', "attachment");
         stream.pipe(res);
     } catch {

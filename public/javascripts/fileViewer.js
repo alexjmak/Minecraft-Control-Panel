@@ -152,12 +152,12 @@ $(document).ready(function() {
     checkMobileResize();
     $(window).resize(checkMobileResize);
 
-    let pathSplit = location.pathname.split("/");
+    let pathSplit = decodeURIComponent(location.pathname).split("/");
     if (pathSplit.length <= 1) {
         $("#back").hide();
     }
 
-    filePath = pathSplit[pathSplit.length - 1];
+    let filePath = pathSplit[pathSplit.length - 1];
     $(".mdc-drawer__title").text(filePath);
 
     getFile(filePath, "authorize");

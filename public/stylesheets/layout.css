@@ -58,6 +58,12 @@ body {
     background-color: #ffffff;
 }
 
+#computername {
+    font-size: 15px;
+    margin-bottom: 17px;
+    margin-left: 2px;
+}
+
 ::-webkit-scrollbar {
     display: none;
 }

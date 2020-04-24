@@ -7,6 +7,7 @@ const createError = require("http-errors");
 const accountManager = require('../accountManager');
 const commandManager = require('../commandManager');
 const authorization = require("../authorization");
+const preferences = require("../preferences");
 const minestat = require('../minestat');
 const gameServer = require('../gameserver');
 const log = require("../log");
@@ -20,7 +21,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/texture-pack.zip', function(req, res, next) {
-    let file = path.resolve("./Minecraft/texture-pack.zip");
+    let file = path.resolve(preferences.get("texture-pack"));
     try {
         let stream = fs.createReadStream(file);
         res.set('content-disposition', "attachment");

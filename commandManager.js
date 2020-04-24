@@ -1,5 +1,6 @@
 const gameServer = require("./gameserver");
 const log = require("./log");
+const preferences = require("./preferences");
 
 function command(command, req) {
     if (typeof command !== "object") {
@@ -39,7 +40,7 @@ function command(command, req) {
                 text = "pong"
                 break;
             case "start":
-                gameServer.start("./Minecraft");
+                gameServer.start(preferences.get("files"));
                 break;
             default:
                 text = "Command - '" + command + "' not found";

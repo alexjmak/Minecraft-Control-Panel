@@ -3,10 +3,11 @@ const createError = require('http-errors');
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
-const strftime = require('strftime');
 const cookieParser = require('cookie-parser');
+const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
 const log = require("./log")
+const accountManager = require('./accountManager');
 const authorization = require('./authorization');
 
 const app = express();
@@ -23,9 +24,8 @@ log.write("Starting server...");
 
 app.use(helmet());
 app.use(cookieParser());
-app.use(express.urlencoded({
-    extended: true
-}));
+app.use(fileUpload());
+app.use(express.json());
 
 app.use(function(req, res, next) {
     if (req.path.endsWith("/") && req.path !== "/") {
@@ -64,7 +64,9 @@ app.use(function(err, req, res, next) {
     log.writeServer(req, req.method, req.url + " (" + (err.status || 500) + " " + err.message + ")");
     res.status(err.status || 500);
     if (res.headersSent) return;
-    res.render('error', {message: err.message, status: err.status});
+    accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function(username) {
+        res.render('error', {message: err.message, status: err.status, username: username});
+    });
 });
 
 app.set('views', path.join(__dirname, 'views'));

@@ -1,13 +1,17 @@
-const express = require('express');
-const os = require("os");
-const createError = require('http-errors');
-const request = require('request');
 const archiver = require('archiver');
+const child_process = require('child_process');
+const crypto = require('crypto');
+const express = require('express');
 const fs = require('fs');
+const createError = require('http-errors');
+const os = require("os");
 const path = require('path');
+const request = require('request');
 const unzipper = require('unzipper');
-const authorization = require("../authorization");
+
 const accountManager = require("../accountManager");
+const authorization = require("../authorization");
+const log = require('../log');
 
 const router = express.Router();
 
@@ -16,54 +20,78 @@ router.get('/files', function(req, res, next) {
     let isValidToken = authorization.verifyToken(token).sub === "updateToken";
     if (!isValidToken) return next(createError(403));
 
-    var zip = archiver('zip');
-    var fileOutput = fs.createWriteStream("tmp.zip");
+    let updateArchiveName = "tmp-" + crypto.randomBytes(4).toString("hex") + ".zip";
+    let fileOutput = fs.createWriteStream(updateArchiveName);
     fileOutput.on('close', function () {
-        res.sendFile(path.join(__dirname, "..", "tmp.zip"), function() {
-            fs.unlinkSync(path.join(__dirname, "..", "tmp.zip"));
+        res.sendFile(path.join(__dirname, "..", updateArchiveName), function() {
+            try {
+                fs.unlinkSync(path.join(__dirname, "..", updateArchiveName));
+            }
+            catch {}
         });
     });
 
-    zip.pipe(fileOutput);
-    zip.glob("keys/**");
-    zip.glob("public/**");
-    //zip.glob("node_modules/**");
-    zip.glob("routes/**");
-    zip.glob("views/**");
-    zip.glob("keys/**");
-    zip.glob("*.js");
-    zip.glob("*.json");
-    zip.on('error', function(err){
+    let archive = archiver('zip');
+    archive.on('error', function(err){
         throw err;
     });
-    zip.finalize();
+    archive.pipe(fileOutput);
+    archive.glob("keys/**");
+    archive.glob("public/**");
+    //archive.glob("node_modules/**");
+    archive.glob("routes/**");
+    archive.glob("views/**");
+    archive.glob("keys/**");
+    archive.glob("*.js");
+    archive.glob("*.json");
+    archive.finalize();
 });
 
 router.use(authorization.doAuthorization);
 
-router.get('/', function(req, res, next) {
+router.use(function(req, res, next) {
     let id = authorization.getLoginTokenAudience(req);
     accountManager.getInformation("privilege", "id", id, function(privilege) {
-        if (privilege === 100) {
-            accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function (username) {
-                res.render('update', {hostname: os.hostname(), username: username});
-            });
-        } else {
-            next(createError(403));
-        }
+        if (privilege === 100) next();
+        else next(createError(403));
+    });
+});
+
+router.get('/', function(req, res, next) {
+    accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function (username) {
+        res.render('update', {hostname: os.hostname(), username: username});
     });
 });
 
 router.post('/', function(req, res) {
     let authorizationToken = authorization.createToken({sub: "updateToken"}, "10s");
     request(req.protocol + "://" + req.body.server + "/update/files", {encoding: "binary", headers: {authorization: authorizationToken}}, function(err, response, body) {
-        fs.writeFile("update.zip", body, "binary", function(err) {
-            fs.createReadStream('update.zip').pipe(unzipper.Extract({ path: path.join(__dirname, "..") }));
-            res.sendStatus(200);
-        })
-
+        if (response !== undefined && response.statusCode === 200) {
+            log.writeServer(req, "Updating server...");
+            fs.writeFile("update.zip", body, "binary", function(err) {
+                let readSteam = fs.createReadStream('update.zip');
+                let pipeSteam = readSteam.pipe(unzipper.Extract({ path: path.join(__dirname, "..") }));
+                pipeSteam.on("finish", function() {
+                    fs.unlink("update.zip", function() {
+                        log.writeServer(req, "Update complete");
+                        if (!res.headersSent) res.sendStatus(200);
+                    });
+                });
+                let error = function(e) {
+                    log.writeServer(req, "Update failed. " + e);
+                    fs.unlink("update.zip", function() {
+                        if (!res.headersSent) res.sendStatus(500);
+                    });
+                };
+                readSteam.on("error", error);
+                pipeSteam.on("error", error);
+            });
+        } else {
+            if (response !== undefined) log.writeServer(req, "Update failed. Update server responded with error " + response.statusCode);
+            else log.writeServer(req, "Update failed. No response from server.");
+            res.sendStatus(400);
+        }
     });
-
 });
 
 module.exports = router;

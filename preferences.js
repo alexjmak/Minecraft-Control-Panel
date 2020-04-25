@@ -19,8 +19,6 @@ function reload() {
         } catch(err) {
             log.write("Read error: " + err);
         }
-
-
     });
 }
 

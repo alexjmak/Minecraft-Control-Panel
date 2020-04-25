@@ -9,6 +9,7 @@ const helmet = require("helmet");
 const log = require("./log")
 const accountManager = require('./accountManager');
 const authorization = require('./authorization');
+const blacklist = require('./blacklist')
 
 const app = express();
 
@@ -44,6 +45,13 @@ app.use(function(req, res, next) {
 });
 
 app.use('/logout', logoutRouter);
+app.use(function(req, res, next) {
+    if (blacklist.contains(req.ip) || !req.ip) {
+        next(createError(403, "Blacklisted from server"));
+    } else {
+        next();
+    }
+})
 app.use('/login', loginRouter);
 app.use("/update", updateRouter);
 app.use(authorization.doAuthorization);

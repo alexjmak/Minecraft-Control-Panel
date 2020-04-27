@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="VcsDirectoryMappings">
-    <mapping directory="$PROJECT_DIR$/../Minecraft Control Panel" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Minecraft/BuildData" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Minecraft/Bukkit" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Minecraft/CraftBukkit" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Minecraft/Spigot" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Minecraft/Spigot/Spigot-API" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Minecraft/Spigot/Spigot-Server" vcs="Git" />
   </component>
 </project>

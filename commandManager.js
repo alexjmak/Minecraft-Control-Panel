@@ -20,8 +20,10 @@ function command(command, req) {
                 gameServer.command("stop");
                 break;
             case "restart":
-                gameServer.setOnCloseFunction(function(cwd) {
-                    gameServer.start(cwd);
+                gameServer.setOnCloseFunction(function() {
+                    let serverJarPath = preferences.get("server");
+                    let cwd = preferences.get("files");
+                    gameServer.start(serverJarPath, cwd);
                 });
                 gameServer.command("stop");
                 break;
@@ -40,7 +42,9 @@ function command(command, req) {
                 text = "pong"
                 break;
             case "start":
-                gameServer.start(preferences.get("files"));
+                let serverJarPath = preferences.get("server");
+                let cwd = preferences.get("files");
+                gameServer.start(serverJarPath, cwd);
                 break;
             default:
                 text = "Command - '" + command + "' not found";

@@ -3,25 +3,25 @@ const pidusage = require('pidusage');
 const log = require("./log")
 
 let gameserver;
-let allocatedMemory = 5000; //MB
+let allocatedMemory = 2000; //MB
 let running = false;
 let onCloseFunction;
 
-function start(cwd) {
+function start(serverJarPath, cwd) {
     log.write("Starting server...");
 
-    gameserver = child_process.spawn('java',  ["-Xmx" +  allocatedMemory + "M",  "-Xms" + allocatedMemory + "M", "-jar", "server.jar", "nogui"], {cwd: cwd});
+    gameserver = child_process.spawn('java',  ["-Xmx" +  allocatedMemory + "M",  "-Xms" + allocatedMemory + "M", "-jar", serverJarPath, "nogui"], {cwd: cwd});
 
     running = true;
 
-    gameserver.on('error', function(err) {
-        log.write(err);
-    });
+    gameserver.stderr.on("data", function(data) {
+        log.writeRaw("[Minecraft] " + data.toString().trimEnd());
+    })
 
-    gameserver.on('close', function (code) {
+    gameserver.on("close", function () {
         running = false;
         log.write("Server stopped");
-        if (onCloseFunction !== undefined) onCloseFunction(cwd);
+        if (onCloseFunction !== undefined) onCloseFunction();
         setOnCloseFunction(undefined);
     });
 

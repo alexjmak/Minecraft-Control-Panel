@@ -21,7 +21,9 @@ router.get('/', function(req, res) {
 });
 
 router.get('/texture-pack.zip', function(req, res, next) {
-    let filePath = preferences.get("texture-pack");
+    let parent = preferences.get("files");
+    let texturePack = preferences.get("texture-pack");
+    let filePath = path.join(parent, texturePack);
     if (!filePath) return
     filePath = path.resolve(filePath);
     try {

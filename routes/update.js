@@ -1,5 +1,4 @@
 const archiver = require('archiver');
-const child_process = require('child_process');
 const crypto = require('crypto');
 const express = require('express');
 const fs = require('fs');
@@ -43,7 +42,8 @@ router.get('/files', function(req, res, next) {
     archive.glob("views/**");
     archive.glob("keys/**");
     archive.glob("*.js");
-    archive.glob("*.json");
+    archive.glob("package.json");
+    archive.glob("package-lock.json");
     archive.finalize();
 });
 

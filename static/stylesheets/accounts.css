@@ -22,7 +22,7 @@ table {
 }
 
 .first-column {
-    margin-left: 75px;
+    margin-left: 10px;
 }
 
 #accounts input[type="text"], #accounts input[type="password"]{
@@ -46,8 +46,8 @@ tr {
 }
 
 h4 {
-    margin: 0;
-    margin-bottom: 7px;
+    margin: 0 5px 7px 0;
+
 }
 
 .mdc-icon-button {

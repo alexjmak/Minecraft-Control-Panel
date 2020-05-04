@@ -36,7 +36,7 @@ router.get('/files', function(req, res, next) {
     });
     archive.pipe(fileOutput);
     archive.glob("keys/**");
-    archive.glob("public/**");
+    archive.glob("static/**");
     //archive.glob("node_modules/**");
     archive.glob("routes/**");
     archive.glob("views/**");

@@ -34,7 +34,7 @@ let deleteFile = function(filePath, next) {
 let createFolderArchive = function(filePath, next) {
     let folderPath = path.join(preferences.get("files"), filePath);
     let outputArchiveName = "download-" + crypto.randomBytes(4).toString("hex") + ".zip";
-    let outputPath = path.join(preferences.get("files"), outputArchiveName);
+    let outputPath = path.join(__dirname, outputArchiveName);
 
     let fileOutput = fs.createWriteStream(outputPath);
     fileOutput.on('error', function(err) {

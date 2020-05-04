@@ -39,7 +39,7 @@ router.get('/*', function(req, res, next) {
                                 res.render('directory', {
                                     username: username,
                                     hostname: os.hostname(),
-                                    directory: {path: filePath, files: JSON.stringify(files.files)}
+                                    directory: {files: Buffer.from(JSON.stringify(files.files)).toString("base64")}
                                 });
                             });
                         });

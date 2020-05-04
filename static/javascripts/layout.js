@@ -1,6 +1,11 @@
 let isMobile;
 
 $(document).ready(function() {
+    if (!$(".mdc-drawer").hasClass("mdc-drawer--modal")) {
+        checkMobileResize();
+        $(window).resize(checkMobileResize);
+    }
+
     if (window.location.pathname === "/login" || $.cookie("loginToken") === undefined) {
         $('#accountButton').click(function() {
             window.location.href = "/login";

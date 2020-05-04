@@ -116,6 +116,8 @@ $(document).ready(function() {
                     }
                 }
                 title.text(propertiesDictionary["motd"]);
+            } else {
+                title.text("Minecraft Control Panel");
             }
         });
     };

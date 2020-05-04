@@ -5,7 +5,7 @@ const supportedTypes = ["txt", "json", "conf", "log", "properties", "yml", "pdf"
 const plainText = ["txt", "json", "conf", "log", "properties", "yml"];
 let oldFileContents;
 
-let getFile = function(filePath, mode, authorization) {
+let getFile = function(filePath, mode, authorization, next) {
     getRequest(filePath + "?" + mode, function(xmlHttpRequest) {
         if (xmlHttpRequest.status === 200) {
             let content = $("#content");
@@ -14,19 +14,20 @@ let getFile = function(filePath, mode, authorization) {
                 authorized = true;
                 let extension = filePath.split(".").pop().toLowerCase();
                 if (supportedTypes.includes(extension)) {
+                    let encodedPathname = window.location.pathname.replace("'", "%27");
                     switch (extension) {
                         default:
                             getFile(filePath, "download");
                             break;
                         case "pdf":
-                            content.append("<object data='/pdfjs/web/viewer.html?file=" + window.location.pathname + "?download'></object>")
+                            content.append("<object data='/pdfjs/web/viewer.html?file=" + encodedPathname + "?download'></object>")
                             break;
                         case "apng": case "bmp": case "gif": case "ico": case "cur": case "jpg":
                         case "jpeg": case "pjpeg": case "pjp": case "png": case ".svg": case "webp":
-                            content.append("<img class='mdc-elevation--z10' src='" + window.location.pathname + "?download'>");
+                            content.append("<img class='mdc-elevation--z10' src='" + encodedPathname + "?download'>");
                             break;
                         case "mp3": case "m4a":
-                            let audio = new Audio(window.location.pathname + "?download");
+                            let audio = new Audio(encodedPathname + "?download");
                             audio.play();
                             break;
                     }
@@ -49,11 +50,13 @@ let getFile = function(filePath, mode, authorization) {
             showAuthorization();
             if (authorization !== undefined) {
                 $("#message").text(xmlHttpRequest.responseText);
+                $("#password").val("");
             }
         } else if (xmlHttpRequest.status === 0) {
-            $("#message").text("No connection");
+            $("#message").text("Connection lost");
             usedPasswordMemory = "";
         }
+        if (next) next(true);
     }, authorization);
 };
 
@@ -77,17 +80,14 @@ var revert = function(event) {
 };
 
 var deleteFile = function(event) {
-    if (window.location.pathname.startsWith("/shared")) return;
     let fileName = event.data.filePath.split("/").pop();
     showDialog(yesNoDialog, "Minecraft Control Panel", "Are you sure you want to delete " + fileName  + "?", {"yes": function() {
             deleteRequest(event.data.filePath, null, function(xmlHttpRequest) {
                 if (xmlHttpRequest.status === 200)  {
                     showSnackbar(basicSnackbar, "Deleted " + fileName);
                     window.location.href = '.';
-                } else if (xmlHttpRequest.status === 403) {
-                    showSnackbar(basicSnackbar, xmlHttpRequest.responseText)
                 } else {
-                    showSnackbar(basicSnackbar, "Error deleting " + fileName)
+                    showSnackbar(basicSnackbar, "Error deleting " + fileName);
                 }
             });
         }});
@@ -116,23 +116,28 @@ var edit = function(event) {
 };
 
 var download = function(event) {
-    if (!authorized) return;
-    window.open(event.data.filePath + "?download", "_blank");
+    if (!authorized) {
+        authorize(event, function(result) {
+            if (result) download(event);
+        });
+    } else {
+        window.open(event.data.filePath + "?download", "_blank");
+    }
 };
 
 var randomNumberArray = new Uint32Array(1);
 window.crypto.getRandomValues(randomNumberArray);
 
-var authorize = function(event) {
+var authorize = function(event, next) {
     let password = $("#password").val();
-
-    if (password.trim() === "") {
+    if (password === "") {
         $("#password").focus()
+        if (next) next(false);
     } else {
         if ($.md5(password, randomNumberArray[0]) === usedPasswordMemory) return;
         usedPasswordMemory = $.md5(password, randomNumberArray[0]);
         password = btoa(":"+ password);
-        getFile(event.data.filePath, "authorize", "Basic " + password)
+        getFile(event.data.filePath, "authorize", "Basic " + password, next)
     }
 
 };
@@ -151,15 +156,11 @@ var hideAuthorization = function()  {
 };
 
 $(document).ready(function() {
-    checkMobileResize();
-    $(window).resize(checkMobileResize);
-
-    let pathSplit = decodeURIComponent(location.pathname).split("/");
-    if (pathSplit.length <= 1) {
-        $("#back").hide();
-    }
+    let pathSplit = location.pathname.split("/");
 
     let filePath = pathSplit[pathSplit.length - 1];
+    filePath = decodeURIComponent(filePath);
+
     $(".mdc-drawer__title").text(filePath);
 
     getFile(filePath, "authorize");
@@ -176,7 +177,7 @@ $(document).ready(function() {
 $(document).keydown(function(event) {
     var key = event.which;
     if (key === 13) {
-        authorize({data: {filePath: filePath}})
+        authorize({data: {filePath: location.pathname}})
     }
 
     if ((event.ctrlKey || event.metaKey) && key === 83) {

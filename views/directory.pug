@@ -3,12 +3,17 @@ extends layout
 block header
     link(rel='stylesheet', type='text/css', href='/stylesheets/directory.css')
     script.
-        let folderContents = JSON.parse("#{directory.files}".replace(/&quot;/g, "\""));
-        let directoryPath = "#{directory.path}";
+        function b64DecodeUnicode(str) {
+            // Going backwards: from bytestream, to percent-encoding, to original string.
+            return decodeURIComponent(atob(str).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        }
+        let folderContents = JSON.parse(b64DecodeUnicode("#{directory.files}"));
     script(type='text/javascript', src= "/javascripts/directory.js")
 
 block drawer
-    aside.mdc-drawer.mdc-top-app-bar--fixed-adjust.mdc-drawer--modal
+    aside.mdc-drawer.mdc-top-app-bar--fixed-adjust
         .mdc-drawer__header
             h3.mdc-drawer__title Minecraft Control Panel
             h6.mdc-drawer__subtitle= hostname

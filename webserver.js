@@ -36,7 +36,7 @@ app.use(function(req, res, next) {
     }
 });
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "static")));
 
 const noLog = ["/command", "/status", "/log", "/log/size", "/properties/hash", "/accounts/list/hash"];
 app.use(function(req, res, next) {

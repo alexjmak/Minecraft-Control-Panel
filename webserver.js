@@ -87,19 +87,7 @@ function start() {
         cert: fs.readFileSync("./keys/https/cert.crt")
     }, app);
     httpsServer.listen(25564);
-
-    //httpRedirectServer();
-
     return httpsServer;
-}
-
-function httpRedirectServer() {
-    let httpServer = express();
-    httpServer.get('*', function(req, res) {
-        res.redirect('https://' + req.headers.host + req.url);
-    });
-    httpServer.listen(80);
-    return httpServer;
 }
 
 module.exports = {

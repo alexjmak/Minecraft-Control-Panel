@@ -10,6 +10,7 @@ require("./preferences")
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
 webServer.start();
+gameServer.startListener();
 
 process.stdin.on("data", commandManager);
 

@@ -1,0 +1,9 @@
+/.idea/
+/files/
+/keys/
+/logs/
+/node_modules/
+/firewall.json
+/database.db
+/preferences.json
+/SERVER_ID

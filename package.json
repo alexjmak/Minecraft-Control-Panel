@@ -23,6 +23,7 @@
     "helmet": "^3.21.3",
     "http-errors": "latest",
     "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.19",
     "pidusage": "^2.0.18",
     "pug": "^2.0.4",
     "readify": "^7.0.3",

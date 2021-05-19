@@ -2,9 +2,10 @@
 /files/
 /keys/
 /logs/
-/Minecraft/
 /node_modules/
+/tmp/
 /firewall.json
 /database.db
+/package-lock.json
 /preferences.json
 /SERVER_ID

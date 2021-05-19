@@ -1,6 +1,5 @@
 const gameServer = require("./gameserver");
-const log = require("./log");
-const preferences = require("./preferences");
+const log = require("./core/log");
 
 function command(command, req) {
     if (typeof command !== "object") {

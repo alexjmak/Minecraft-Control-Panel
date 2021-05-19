@@ -1,10 +1,4 @@
 $(document).ready(function() {
-    let x = document.getElementsByClassName('mdc-button');
-    let i;
-    for (i = 0; i < x.length; i++) {
-        mdc.ripple.MDCRipple.attachTo(x[i]);
-    }
-
 	let title = $("#title");
     let command = $("#command");
     let console = $("#console");
@@ -16,7 +10,6 @@ $(document).ready(function() {
     let restartClicked = false;
     let firstRun = true;
 
-
     const memoryBar = mdc.linearProgress.MDCLinearProgress.attachTo(document.getElementById('memoryBar'));
 
     let status = {};
@@ -25,7 +18,6 @@ $(document).ready(function() {
         if ($(window).width() < 580) {
             $("#memory").hide();
             $("#memoryTitle").hide();
-
             $("#memoryBar").css("padding-top", "15px")
         } else {
             $("#memory").show();
@@ -37,6 +29,7 @@ $(document).ready(function() {
     $(window).resize(function() {
         updateWindow();
     });
+
     let updateGameServerStatus = function() {
         if (firstRun) {
             firstRun = false;
@@ -103,7 +96,7 @@ $(document).ready(function() {
     };
 
 	let getProperties = function() {
-	    getRequest("/files/server.properties?download", function(xmlHttpRequest) {
+	    getRequest("/Minecraft/server.properties?download", function(xmlHttpRequest) {
             if (xmlHttpRequest.status === 200) {
                 let propertiesDictionary = {};
                 let propertiesList = xmlHttpRequest.responseText.trim().split("\n");
@@ -115,9 +108,13 @@ $(document).ready(function() {
                         propertiesDictionary[lineSplit[0]] = lineSplit[1];
                     }
                 }
-                title.text(propertiesDictionary["motd"]);
+                let motd = propertiesDictionary["motd"];
+                if (!motd || motd === "") {
+                    motd = locale.app_name;
+                }
+                title.text(motd);
             } else {
-                title.text("Minecraft Control Panel");
+                title.text(locale.app_name);
             }
         });
     };
@@ -125,26 +122,26 @@ $(document).ready(function() {
     let getLogHash = function(automatic) {
 
         getRequest("/log/size", function(xmlHttpRequest) {
-            if (xmlHttpRequest.status == 200) {
-                if (noConnDialog != undefined && noConnDialog.isOpen) noConnDialog.close();
+            if (xmlHttpRequest.status === 200) {
+                if (noConnDialog && noConnDialog.isOpen) noConnDialog.close();
                 let size = parseInt(xmlHttpRequest.responseText);
                 if (xmlHttpRequest.responseURL.search("login") !== -1) {
                     automatic = false;
-                    showDialog(okDialog, "Minecraft Control Panel", "Your session has expired", {"close": function() {window.location = "/logout"}});
+                    showDialog(okDialog, locale.app_name, locale.session_expired, {"close": function() {window.location = "/logout"}});
                 } else if (oldSize !== size) {
                     if (size > oldSize) getLog(oldSize);
                     else getLog();
                     oldSize = size;
                 }
             }
-            if (xmlHttpRequest.status == 0 && (noConnDialog === undefined || !noConnDialog.isOpen)) {
+            if (xmlHttpRequest.status === 0 && (noConnDialog === undefined || !noConnDialog.isOpen)) {
                 try {
-                    noConnDialog = showDialog(okDialog, "Minecraft Control Panel", "No connection", {
+                    noConnDialog = showDialog(okDialog, locale.app_name, locale.no_connection, {
                         "close": function() {
                             getLogHash(false);
                         }
                     });
-                    noConnDialog.buttons_[0].firstChild.innerHTML = "RETRY";
+                    noConnDialog.buttons_[0].firstChild.innerHTML = locale.retry;
                     noConnDialog.escapeKeyAction = "";
                     noConnDialog.scrimClickAction = "";
                 } catch (err) {
@@ -163,7 +160,7 @@ $(document).ready(function() {
             log.text("");
         }
 
-        getRequest("/log?start=" + start, function(xmlHttpRequest) {
+        getRequest("/log/raw?start=" + start, function(xmlHttpRequest) {
             if (xmlHttpRequest.status === 200) {
                 let logText = xmlHttpRequest.responseText;
                 log.append(logText);
@@ -198,8 +195,7 @@ $(document).ready(function() {
                 $("#start").attr("disabled", false);
                 $("#stop").attr("disabled", false);
                 $("#restart").attr("disabled", false);
-
-                showDialog(okDialog, "Minecraft Control Panel", xmlHttpRequest.responseText);
+                showDialog(okDialog, locale.app_name, locale.insufficient_privilege);
             }
         });
     };

@@ -1,0 +1,45 @@
+extends layout
+
+block header
+    link(rel='stylesheet', type='text/css', href='/stylesheets/firewall.css')
+    script.
+        Object.assign(locale, {
+            confirm_delete: "#{locale.confirm_delete}",
+            session_expired: "#{locale.session_expired}",
+            cant_retrieve_firewall: "#{locale.cant_retrieve_firewall}",
+            ip_address: "#{locale.ip_address}",
+            start_date: "#{locale.start_date}",
+            length: "#{locale.length}",
+            no_start_date: "#{locale.no_start_date}",
+            no_end_date: "#{locale.no_end_date}",
+            new_ip: "#{locale.new_ip}"
+        });
+        const list = parseInt("#{list}");
+    script(type='text/javascript', src="/javascripts/firewall.js")
+
+block drawer
+    aside.mdc-drawer.mdc-top-app-bar--fixed-adjust
+        .mdc-drawer__content
+            nav.mdc-list
+                a.mdc-list-item.mdc-list-item--activated(href='/firewall')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') list
+                    span.mdc-list-item__text= locale.firewall
+
+                .mdc-list-divider
+                a.mdc-list-item(href='/logout')
+                    i.material-icons.mdc-list-item__graphic(aria-hidden='true') launch
+                    span.mdc-list-item__text= locale.logout
+
+block content
+    table#firewall
+        tbody#firewall_input
+            tr.first-row
+                td
+                    h4.first-column= locale.ip_address
+                td
+                    h4= locale.start_date
+                td
+                    h4= locale.end_date
+                td
+
+

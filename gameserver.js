@@ -1,12 +1,11 @@
 const child_process = require('child_process');
 const pidusage = require('pidusage');
-const log = require("./log")
+const log = require("./core/log")
 const net = require("net")
 const preferences = require("./preferences")
 
 let gameserver;
-let listenerServer = new net.Server();
-let allocatedMemory = 2000; //MB
+const listenerServer = new net.Server();
 let running = false;
 let onCloseFunction;
 
@@ -15,8 +14,9 @@ function start() {
     if (running) return;
     running = true;
     listenerServer.close();
-    let serverJarPath = preferences.get("server");
-    let cwd = preferences.get("files");
+    const serverJarPath = preferences.get("server");
+    const cwd = preferences.get("files");
+    const allocatedMemory = preferences.get("memory");
 
     log.write("Starting server...");
 
@@ -25,7 +25,9 @@ function start() {
 
 
     gameserver.stderr.on("data", function(data) {
-        log.writeRaw("[Minecraft] " + data.toString().trimEnd());
+        const text = "[Minecraft] " + data.toString().trimEnd();
+        console.log(text);
+        log.add(text);
     })
 
     gameserver.on("close", function () {
@@ -37,7 +39,9 @@ function start() {
     });
 
     gameserver.stdout.on("data", function(data) {
-        log.writeRaw("[Minecraft] " + data.toString().trimEnd());
+        const text = "[Minecraft] " + data.toString().trimEnd();
+        console.log(text);
+        log.add(text);
     });
 
     return gameserver;
@@ -87,17 +91,17 @@ function setOnCloseFunction(method) {
     onCloseFunction = method;
 }
 
-function getUsage(next) {
+async function getUsage() {
     if (!isRunning()) {
-        if (next !== undefined) next();
         return;
     }
-    pidusage(gameserver.pid, function(err, usage) {
-        if (err === null) {
-            usage.allocatedMemory = allocatedMemory * 1000000;
-            if (next !== undefined) next(usage);
-        } else next();
-
+    return new Promise((resolve, reject) => {
+        pidusage(gameserver.pid, function(err, usage) {
+            if (err === null) {
+                usage.allocatedMemory = allocatedMemory * 1000000;
+                resolve(usage);
+            } else resolve();
+        });
     });
 }
 

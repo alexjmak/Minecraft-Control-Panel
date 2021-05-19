@@ -1,85 +1,52 @@
 const express = require('express');
-const os = require('os');
-const crypto = require('crypto');
 const fs = require("fs");
 const path = require("path");
-const createError = require("http-errors");
-const accountManager = require('../accountManager');
 const commandManager = require('../commandManager');
-const authorization = require("../authorization");
-const preferences = require("../preferences");
+const authorization = require("../core/authorization");
+const preferences = require("../core/preferences");
 const minestat = require('../minestat');
 const gameServer = require('../gameserver');
-const log = require("../log");
+const log = require("../core/log");
+const fileManager = require("../core/fileManager");
+const render = require("../core/render");
 
 const router = express.Router();
 
-router.get('/', function(req, res) {
-    accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function(username) {
-        res.render('index', {username: username, hostname: os.hostname(), address: req.hostname, port: 25565});
-    });
+router.get('/', function(req, res, next) {
+    render('index', {address: req.hostname, port: 25565}, req, res, next);
 });
 
-router.get('/texture-pack.zip', function(req, res, next) {
-    let parent = preferences.get("files");
-    let texturePack = preferences.get("texture-pack");
+router.get('/texture_pack.zip', async function(req, res, next) {
+    const parent = preferences.get("files");
+    const texturePack = preferences.get("texture_pack");
+    if (!parent || !texturePack) return res.sendStatus(404);
     let filePath = path.join(parent, texturePack);
-    if (!filePath) return
     filePath = path.resolve(filePath);
-    try {
-        let stream = fs.createReadStream(filePath);
-        res.set('content-disposition', "attachment");
-        stream.pipe(res);
-    } catch {
-        next(createError(404));
-    }
-
+    const fileStream = await fileManager.readFile(filePath)
+    fileManager.downloadFile(fileStream, "texture_pack.zip", req, res, next);
 });
 
-router.get('/log', function(req, res, next) {
-    let send = log.get();
-    let start = req.query.start;
-    if (start) {
-        start = parseInt(start);
-        if (Number.isInteger(start) && 0 <= start && start < send.length) send = send.substring(start);
-    }
-    res.send(send);
-});
-
-router.get('/log/size', function(req, res) {
-    let hash = log.get().length;
-    res.send(hash.toString());
-});
-
-router.get('/status', function(req, res) {
-    minestat.init(req.hostname, 25565, function() {
-        gameServer.getUsage(function(usage) {
-            let status = Object.assign({}, minestat);
-            if (usage !== undefined) {
-                status.cpu = usage.cpu;
-                status.memory = usage.memory;
-                status.allocatedMemory = usage.allocatedMemory;
-                status.elapsed = usage.elapsed;
-            }
-            if (!res.headersSent) {
-                res.send(JSON.stringify(status));
-            }
-        });
+router.get('/status', function(req, res, next) {
+    minestat.init(req.hostname, 25565, async function() {
+        const usage = await gameServer.getUsage();
+        const status = Object.assign({}, minestat);
+        if (usage) {
+            status.cpu = usage.cpu;
+            status.memory = usage.memory;
+            status.allocatedMemory = usage.allocatedMemory;
+            status.elapsed = usage.elapsed;
+        }
+        if (!res.headersSent) {
+            res.send(JSON.stringify(status));
+        }
     });
 });
 
-router.post('/command', function(req, res) {
-    accountManager.getInformation("privilege", "id", authorization.getLoginTokenAudience(req), function(privilege) {
-        accountManager.getInformation("username", "id", authorization.getLoginTokenAudience(req), function(username) {
-            if (privilege > 0 || username === "admin") {
-                commandManager(req.body.command, req);
-                res.status(200).end();
-            } else {
-                res.status(403).send("Insufficient privilege level");
-            }
-        });
+router.use((req, res, next) => authorization.checkPrivilege(req, res, next, 1));
 
-    });
+router.post('/command', function(req, res, next) {
+    commandManager(req.body.command, req);
+    res.status(200).end();
 });
 
 

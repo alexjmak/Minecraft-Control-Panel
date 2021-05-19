@@ -98,6 +98,7 @@ async function getUsage() {
     return new Promise((resolve, reject) => {
         pidusage(gameserver.pid, function(err, usage) {
             if (err === null) {
+                const allocatedMemory = preferences.get("memory");
                 usage.allocatedMemory = allocatedMemory * 1000000;
                 resolve(usage);
             } else resolve();

@@ -5,6 +5,8 @@ const net = require("net")
 const preferences = require("./preferences")
 const minestat = require("./minestat");
 const minecraftProtocol = require("minecraft-protocol");
+const path = require("path");
+const fs = require("fs");
 
 let gameserver;
 let listenerServer;
@@ -13,6 +15,28 @@ let onCloseFunction;
 
 let consecutiveZeroPlayers = 0;
 
+async function parseServerProperties() {
+    return new Promise((resolve, reject) => {
+        const cwd = preferences.get("files");
+        const propertiesFile = path.join(cwd, "server.properties");
+        fs.readFile(propertiesFile, function(err, data) {
+            if (err) return reject(err);
+            let serverProperties = {};
+            const lines = data.toString().split("\n");
+            for (let line of lines) {
+                line = line.trim();
+                if (line.indexOf("#") !== -1) {
+                    line = line.substring(0, line.indexOf("#"));
+                }
+                if (line === "") continue;
+                const property = line.split("=")[0];
+                const value = line.split("=")[1];
+                serverProperties[property] = value;
+            }
+            resolve(serverProperties);
+        });
+    });
+}
 
 function start() {
     if (running) return;
@@ -23,6 +47,7 @@ function start() {
     const cwd = preferences.get("files");
     const allocatedMemory = preferences.get("memory");
     const inactiveAutoStop = preferences.get("inactiveAutoStop");
+    const port = 25565;
 
     log.write("Starting server...");
 
@@ -30,7 +55,7 @@ function start() {
 
 
     if (inactiveAutoStop) {
-        setTimeout(checkInactiveServer, 20 * 60 * 1000);
+        setTimeout(checkInactiveServer.bind(this, port), 20 * 60 * 1000);
     }
 
     gameserver.stderr.on("data", function(data) {
@@ -55,13 +80,20 @@ function start() {
 
     return gameserver;
 }
-function startListener() {
-    const port = 25565;
+async function startListener() {
+    const serverProperties = await parseServerProperties();
+    const port = serverProperties["port"];
 
     log.write("Starting listener server...");
 
+    let motd = "\u00A7e\u00A7lClick to start server";
+
+    if (serverProperties["motd"]) {
+        motd = serverProperties["motd"] + "\n" + motd;
+    }
+
     listenerServer = minecraftProtocol.createServer({
-        motd: "\u00A7e\u00A7lClick to start server",
+        motd: motd,
         maxPlayers: 1,
         version: "1.17",
         port: port,
@@ -101,13 +133,13 @@ async function getUsage() {
     });
 }
 
-async function checkInactiveServer() {
+async function checkInactiveServer(port) {
     if (!running) return;
     let currentPlayers;
     try {
-        currentPlayers = await getOnlinePlayers();
+        currentPlayers = await getOnlinePlayers(port);
     } catch {
-        return setTimeout(checkInactiveServer, 1 * 60 * 1000);
+        return setTimeout(checkInactiveServer.bind(this, port), 1 * 60 * 1000);
     }
     log.write("Current players: " + currentPlayers);
     if (currentPlayers === 0) {
@@ -118,20 +150,20 @@ async function checkInactiveServer() {
             command("stop");
         } else {
             // Check again in a minute
-            setTimeout(checkInactiveServer, 1 * 60 * 1000);
+            setTimeout(checkInactiveServer.bind(this, port), 1 * 60 * 1000);
         }
     } else {
         consecutiveZeroPlayers = 0;
         log.write("Players are online, checking again in 20 minutes");
         // Check again in 20 minutes
-        setTimeout(checkInactiveServer, 20 * 60 * 1000);
+        setTimeout(checkInactiveServer.bind(this, port), 20 * 60 * 1000);
     }
 }
-async function getOnlinePlayers() {
+async function getOnlinePlayers(port) {
     let timeout = 5 * 1000;
     return new Promise((resolve, reject) => {
         setTimeout(reject, timeout);
-        minestat.init("localhost", 25565, timeout / 1000,async function() {
+        minestat.init("localhost", port, timeout / 1000,async function() {
             const current_players = minestat.current_players;
             if (isNaN(current_players)) return reject();
             resolve(parseInt(minestat.current_players));

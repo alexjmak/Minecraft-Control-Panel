@@ -4,6 +4,7 @@ const log = require("./core/log")
 const net = require("net")
 const preferences = require("./preferences")
 const minestat = require("./minestat");
+const minecraftProtocol = require("minecraft-protocol");
 
 let gameserver;
 const listenerServer = new net.Server();
@@ -54,41 +55,26 @@ function start() {
 
     return gameserver;
 }
-let usernameChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
 function startListener() {
     const port = 25565;
 
     log.write("Starting listener server...");
 
-    listenerServer.listen(port);
-
-    listenerServer.on('connection', function(socket) {
-        socket.on("data", function(data) {
-            let username = data.toString().substring(3);
-            let isUsername = true;
-            for (let c of username) {
-                if (!usernameChars.includes(c)) {
-                    isUsername = false;
-                    break;
-                }
-            }
-            if (username.length < 3 || username.length > 16) isUsername = false;
-
-            if (isUsername) {
-                socket.destroy();
-                listenerServer.close(function () {
-                    if (!running) start();
-                });
-            }
-        });
-
-        socket.on("error", function(err) {
-            console.log(err);
-        })
-
+    const server = minecraftProtocol.createServer({
+        motd: "\u00A7e\u00A7lClick to start server",
+        maxPlayers: 1,
+        version: "1.17",
+        port: port,
     });
 
+    server.on("login", function(client) {
+        client.end("Starting server... come back in a minute");
+        server.close();
+    });
 
+    server.on("close", function() {
+        if (!running) start();
+    });
 }
 
 function isRunning() {

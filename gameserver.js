@@ -13,6 +13,7 @@ let listenerServer;
 let running = false;
 let onCloseFunction;
 
+let inactiveServerTimeout;
 let consecutiveZeroPlayers = 0;
 
 async function parseServerProperties() {
@@ -44,6 +45,9 @@ function start() {
     if (listenerServer) {
         listenerServer.close();
     }
+    if (inactiveServerTimeout) {
+        clearTimeout(inactiveServerTimeout);
+    }
     consecutiveZeroPlayers = 0;
     const serverJarPath = preferences.get("server");
     const serverArgs = preferences.get("serverArgs");
@@ -59,7 +63,7 @@ function start() {
 
 
     if (inactiveAutoStop) {
-        setTimeout(checkInactiveServer.bind(this, port), 20 * 60 * 1000);
+        inactiveServerTimeout = setTimeout(checkInactiveServer.bind(this, port), 20 * 60 * 1000);
     }
 
     gameserver.stderr.on("data", function(data) {
@@ -150,7 +154,8 @@ async function checkInactiveServer(port) {
     try {
         currentPlayers = await getOnlinePlayers(port);
     } catch {
-        return setTimeout(checkInactiveServer.bind(this, port), 1 * 60 * 1000);
+        inactiveServerTimeout = setTimeout(checkInactiveServer.bind(this, port), 1 * 60 * 1000);
+        return;
     }
     log.write("Current players: " + currentPlayers);
     if (currentPlayers === 0) {
@@ -161,13 +166,13 @@ async function checkInactiveServer(port) {
             command("stop");
         } else {
             // Check again in a minute
-            setTimeout(checkInactiveServer.bind(this, port), 1 * 60 * 1000);
+            inactiveServerTimeout = setTimeout(checkInactiveServer.bind(this, port), 1 * 60 * 1000);
         }
     } else {
         consecutiveZeroPlayers = 0;
         log.write("Players are online, checking again in 20 minutes");
         // Check again in 20 minutes
-        setTimeout(checkInactiveServer.bind(this, port), 20 * 60 * 1000);
+        inactiveServerTimeout = setTimeout(checkInactiveServer.bind(this, port), 20 * 60 * 1000);
     }
 }
 async function getOnlinePlayers(port) {

@@ -7,7 +7,7 @@ const minestat = require("./minestat");
 const minecraftProtocol = require("minecraft-protocol");
 
 let gameserver;
-const listenerServer = new net.Server();
+let listenerServer;
 let running = false;
 let onCloseFunction;
 
@@ -60,21 +60,22 @@ function startListener() {
 
     log.write("Starting listener server...");
 
-    const server = minecraftProtocol.createServer({
+    listenerServer = minecraftProtocol.createServer({
         motd: "\u00A7e\u00A7lClick to start server",
         maxPlayers: 1,
         version: "1.17",
         port: port,
     });
 
-    server.on("login", function(client) {
+    listenerServer.on("login", function(client) {
         client.end("Starting server... come back in a minute");
-        server.close();
+        listenerServer.on("close", function() {
+            if (!running) start();
+        });
+        listenerServer.close();
     });
 
-    server.on("close", function() {
-        if (!running) start();
-    });
+
 }
 
 function isRunning() {

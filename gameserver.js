@@ -47,6 +47,7 @@ function start() {
     consecutiveZeroPlayers = 0;
     const serverJarPath = preferences.get("server");
     const serverArgs = preferences.get("serverArgs");
+    const jvmArgs = preferences.get("jvmArgs");
     const cwd = preferences.get("files");
     const allocatedMemory = preferences.get("memory");
     const inactiveAutoStop = preferences.get("inactiveAutoStop");
@@ -54,7 +55,7 @@ function start() {
 
     log.write("Starting server...");
 
-    gameserver = child_process.spawn('java',  ["-Xmx" +  allocatedMemory + "M",  "-Xms" + allocatedMemory + "M", "-jar", serverJarPath, "nogui"].concat(serverArgs), {cwd: cwd});
+    gameserver = child_process.spawn('java',  ["-Xmx" +  allocatedMemory + "M",  "-Xms" + allocatedMemory + "M"].concat(jvmArgs).concat(["-jar", serverJarPath, "nogui"]).concat(serverArgs), {cwd: cwd});
 
 
     if (inactiveAutoStop) {

@@ -101,14 +101,12 @@ async function startListener() {
     });
 
     listenerServer.on("login", function(client) {
-        if (client.uuid) {
-            log.write(`UUID of player ${client.username} is ${client.uuid}`);
-        }
+        log.write(`UUID of player ${client.username} is ${client.uuid}`);
         log.write(`${client.username}[${client.socket.remoteAddress}:${client.socket.remotePort}] logged in`);
         client.on("end", function() {
             log.write(`${client.username} lost connection: Disconnected`);
         });
-        client.end("Starting server...");
+        client.end("Starting server...\nJoin server again");
         log.write("Stopping listening server")
         listenerServer.on("close", function() {
             if (!running) start();

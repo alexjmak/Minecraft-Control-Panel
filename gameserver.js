@@ -86,21 +86,30 @@ async function startListener() {
 
     log.write("Starting listener server...");
 
-    let motd = "\u00A7e\u00A7lClick to start server";
+    let motd = "\u00A7e\u00A7lIdle Mode - Join to start server\u00A7r";
 
     if (serverProperties["motd"]) {
-        motd = serverProperties["motd"] + "\n" + motd;
+        motd = motd + "\n" + serverProperties["motd"];
     }
 
     listenerServer = minecraftProtocol.createServer({
         motd: motd,
-        maxPlayers: 1,
+        maxPlayers: parseInt(serverProperties["max-players"]),
         version: "1.17",
+        favicon: path.join(preferences.get("files"), "icon.png"),
         port: port,
     });
 
     listenerServer.on("login", function(client) {
-        client.end("Starting server... come back in a minute");
+        if (client.uuid) {
+            log.write(`UUID of player ${client.username} is ${client.uuid}`);
+        }
+        log.write(`${client.username}[${client.socket.remoteAddress}:${client.socket.remotePort}] logged in`);
+        client.on("end", function() {
+            log.write(`${client.username} lost connection: Disconnected`);
+        });
+        client.end("Starting server...");
+        log.write("Stopping listening server")
         listenerServer.on("close", function() {
             if (!running) start();
         });

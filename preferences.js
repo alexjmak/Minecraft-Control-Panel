@@ -4,6 +4,7 @@ preferences.setDefaultConfiguration({
     files: "./Minecraft",
     texture_pack: "texture_pack.zip",
     server: "server.jar",
+    serverArgs: [],
     memory: 2000,
     inactiveAutoStop: true
 });

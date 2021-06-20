@@ -24,6 +24,8 @@ const filesRouter = require("./core/routes/files");
 const logRouter = require("./core/routes/log");
 const languageRouter = require("./core/routes/language");
 const updateRouter = require("./core/routes/update");
+const notifyRouter = require("./routes/notify");
+
 const app = express();
 
 
@@ -59,10 +61,11 @@ if (preferences.get("whitelist")) app.use(firewall.whitelist.enforce);
 app.use("/logout", logoutRouter);
 app.use("/login", loginRouter);
 app.use("/language", languageRouter);
+app.use("/update", updateRouter);
+app.use("/notify", notifyRouter);
 app.use(authorization.doAuthorization);
 app.use("/accounts", accountsRouter);
 app.use("/log", logRouter);
-app.use("/update", updateRouter);
 app.use("/firewall", firewallRouter);
 app.use("/Minecraft", filesRouter());
 app.use("/", indexRouter);

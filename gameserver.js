@@ -54,17 +54,13 @@ function start() {
     const jvmArgs = preferences.get("jvmArgs");
     const cwd = preferences.get("files");
     const allocatedMemory = preferences.get("memory");
-    const inactiveAutoStop = preferences.get("inactiveAutoStop");
-    const port = 25565;
 
     log.write("Starting server...");
 
     gameserver = child_process.spawn('java',  ["-Xmx" +  allocatedMemory + "M",  "-Xms" + allocatedMemory + "M"].concat(jvmArgs).concat(["-jar", serverJarPath, "nogui"]).concat(serverArgs), {cwd: cwd});
 
+    startCheckInactiveServer();
 
-    if (inactiveAutoStop) {
-        inactiveServerTimeout = setTimeout(checkInactiveServer.bind(this, port), 20 * 60 * 1000);
-    }
 
     gameserver.stderr.on("data", function(data) {
         const text = "[Minecraft] " + data.toString().trimEnd();
@@ -148,6 +144,31 @@ async function getUsage() {
     });
 }
 
+function checkInactiveServerPlugin(onlinePlayers) {
+    if (!running) return;
+    const inactiveAutoStop = preferences.get("inactiveAutoStop");
+    if (!inactiveAutoStop) return;
+    if (inactiveServerTimeout) {
+        clearTimeout(inactiveServerTimeout);
+    }
+    if (onlinePlayers === 0) {
+        inactiveServerTimeout = setTimeout(function() {
+            log.write("Stopping server due to inactivity...")
+            command("stop");
+        }, 30 * 60 * 1000)
+    }
+}
+
+function startCheckInactiveServer() {
+    const inactiveAutoStop = preferences.get("inactiveAutoStop");
+    const port = 25565;
+    if (!inactiveAutoStop) return;
+    if (inactiveServerTimeout) {
+        clearTimeout(inactiveServerTimeout);
+    }
+    inactiveServerTimeout = setTimeout(checkInactiveServer.bind(this, port), 20 * 60 * 1000);
+}
+
 async function checkInactiveServer(port) {
     if (!running) return;
     let currentPlayers;
@@ -157,10 +178,8 @@ async function checkInactiveServer(port) {
         inactiveServerTimeout = setTimeout(checkInactiveServer.bind(this, port), 1 * 60 * 1000);
         return;
     }
-    log.write("Current players: " + currentPlayers);
     if (currentPlayers === 0) {
         consecutiveZeroPlayers++;
-        log.write("No players online, checked " + consecutiveZeroPlayers + " times");
         if (consecutiveZeroPlayers >= 10) {
             log.write("Stopping server due to inactivity...")
             command("stop");
@@ -170,7 +189,6 @@ async function checkInactiveServer(port) {
         }
     } else {
         consecutiveZeroPlayers = 0;
-        log.write("Players are online, checking again in 20 minutes");
         // Check again in 20 minutes
         inactiveServerTimeout = setTimeout(checkInactiveServer.bind(this, port), 20 * 60 * 1000);
     }
@@ -197,6 +215,8 @@ module.exports = {
     startListener: startListener,
     isRunning: isRunning,
     setOnCloseFunction: setOnCloseFunction,
+    startCheckInactiveServer: startCheckInactiveServer,
+    checkInactiveServerPlugin: checkInactiveServerPlugin,
     getUsage: getUsage,
     command: command
 };

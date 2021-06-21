@@ -102,7 +102,7 @@ $(document).ready(function() {
 	let showNotifications = function() {
 		if (notifications.length > 0) {
 			if (!snackbar_ || !isOpen) {
-				const notifciation = notifications.shift();
+				const notification = notifications.shift();
 				showSnackbar(basicSnackbar, notification, null, null, function() {
 					showNotifications();
 				});
@@ -110,14 +110,13 @@ $(document).ready(function() {
 		}
 	}
     let getNotifications = function() {
-        const timeout = 5000;
+        const timeout = 10000;
         const data = {"timestamp": lastNotificationsUpdate};
         postRequest("/notifications", JSON.stringify(data), function(xmlHttpRequest) {
             if (xmlHttpRequest.status === 200) {
-                
-				notifications.join(JSON.parse(xmlHttpRequest.responseText));
+                const newNotifications = JSON.parse(xmlHttpRequest.responseText);
+                notifications = notifications.concat(newNotifications);
                 lastNotificationsUpdate = Date.now();
-				
 				showNotifications();
 				
             }

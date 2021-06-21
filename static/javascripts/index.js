@@ -10,7 +10,9 @@ $(document).ready(function() {
     let restartClicked = false;
     let firstRun = true;
     let lastNotificationsUpdate = Date.now();
-
+	let snackbarWaitTimeout = 0;
+	let notifications = [];
+	
     const memoryBar = mdc.linearProgress.MDCLinearProgress.attachTo(document.getElementById('memoryBar'));
 
     let status = {};
@@ -96,16 +98,28 @@ $(document).ready(function() {
 
     };
 
+
+	let showNotifications = function() {
+		if (notifications.length > 0) {
+			if (!snackbar_ || !isOpen) {
+				const notifciation = notifications.shift();
+				showSnackbar(basicSnackbar, notification, null, null, function() {
+					showNotifications();
+				});
+			}
+		}
+	}
     let getNotifications = function() {
-        const timeout = 10000;
+        const timeout = 5000;
         const data = {"timestamp": lastNotificationsUpdate};
         postRequest("/notifications", JSON.stringify(data), function(xmlHttpRequest) {
             if (xmlHttpRequest.status === 200) {
-                const notifications = JSON.parse(xmlHttpRequest.responseText);
+                
+				notifications.join(JSON.parse(xmlHttpRequest.responseText));
                 lastNotificationsUpdate = Date.now();
-                for (const notification of notifications) {
-                    showSnackbar(basicSnackbar, notification)
-                }
+				
+				showNotifications();
+				
             }
             window.setTimeout(getNotifications, timeout, true);
         });

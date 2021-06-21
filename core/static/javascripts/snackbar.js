@@ -15,9 +15,9 @@ let actionSnackbar = "<div id=\"snackbar\" class=\"mdc-snackbar\"> <div class=\"
 
 let isOpen = false;
 
-let showSnackbar = function(type, body, actionText, actionFunction) {
+let showSnackbar = function(type, body, actionText, actionFunction, closeFunction) {
 
-    if (snackbar_ !== undefined && isOpen) {
+    if (snackbar_ && isOpen) {
         snackbar_.close("reopen");
 
     } else {
@@ -33,13 +33,16 @@ let showSnackbar = function(type, body, actionText, actionFunction) {
         $("#snackbar").remove();
 
         if (event.detail.reason === "action") {
-            if (actionFunction !== undefined) actionFunction();
+            if (actionFunction) actionFunction();
         }
 
         if (event.detail.reason === "reopen") {
             showSnackbar(type, body, actionText, actionFunction);
 
         }
+
+	if (closeFunction) closeFunction();
+        
     });
 
     return snackbar_;

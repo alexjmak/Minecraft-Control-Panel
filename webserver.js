@@ -46,7 +46,7 @@ app.use(function (req, res, next) {
     next();
 })
 
-const noLog = ["/accounts/list/hash", "/log/raw", "/log/size", "/status"];
+const noLog = ["/accounts/list/hash", "/log/raw", "/log/size", "/status", "/notifications"];
 app.use(function (req, res, next) {
     if (noLog.indexOf(req.path) === -1) log.writeServer(req, req.method, req.url);
     next();

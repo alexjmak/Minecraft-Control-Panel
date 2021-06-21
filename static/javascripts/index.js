@@ -9,6 +9,7 @@ $(document).ready(function() {
     let noConnDialog;
     let restartClicked = false;
     let firstRun = true;
+    let lastNotificationsUpdate = Date.now();
 
     const memoryBar = mdc.linearProgress.MDCLinearProgress.attachTo(document.getElementById('memoryBar'));
 
@@ -94,6 +95,21 @@ $(document).ready(function() {
         });
 
     };
+
+    let getNotifications = function() {
+        const timeout = 10000;
+        const data = {"timestamp": lastNotificationsUpdate};
+        postRequest("/notifications", JSON.stringify(data), function(xmlHttpRequest) {
+            if (xmlHttpRequest.status === 200) {
+                const notifications = JSON.parse(xmlHttpRequest.responseText);
+                lastNotificationsUpdate = Date.now();
+                for (const notification of notifications) {
+                    showSnackbar(basicSnackbar, notification)
+                }
+            }
+            window.setTimeout(getNotifications, timeout, true);
+        });
+    }
 
 	let getProperties = function() {
 	    getRequest("/Minecraft/server.properties?download", function(xmlHttpRequest) {
@@ -233,5 +249,6 @@ $(document).ready(function() {
     updateWindow();
     getProperties();
     getLogHash(true);
+    getNotifications();
     getGameServerStatus(true);
 });

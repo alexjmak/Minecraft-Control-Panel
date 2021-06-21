@@ -9,6 +9,7 @@ const gameServer = require('../gameserver');
 const log = require("../core/log");
 const fileManager = require("../core/fileManager");
 const render = require("../core/render");
+const notifications = require("../notifications");
 
 const router = express.Router();
 
@@ -40,6 +41,11 @@ router.get('/status', function(req, res, next) {
             res.send(JSON.stringify(status));
         }
     });
+});
+
+router.post('/notifications', function(req, res, next) {
+    const timestamp = req.body.timestamp;
+    res.json(notifications.get(timestamp));
 });
 
 router.use((req, res, next) => authorization.checkPrivilege(req, res, next, 1));
